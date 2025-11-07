@@ -12,6 +12,11 @@ out/
 .vs/
 
 *.log
+<<<<<<< HEAD
+logs/
+LogFiles/
+=======
+>>>>>>> b162c3d26f65a28a49988938898d03a23b3af087
 
 .env
 .env.*
@@ -30,6 +35,14 @@ Migrations/*_efmodel_snapshot.cs
 *.backup
 *.swp
 
+<<<<<<< HEAD
+wwwroot/dist/
+wwwroot/lib/
+wwwroot/build/
+node_modules/
+
+=======
+>>>>>>> b162c3d26f65a28a49988938898d03a23b3af087
 .DS_Store
 Thumbs.db
 ehthumbs.db

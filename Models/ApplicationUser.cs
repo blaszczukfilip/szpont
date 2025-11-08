@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace szpont.Models
 {
+    [Index(nameof(StudentIndex), IsUnique = true)]
     [Index(nameof(StudentIndex), IsUnique =true)]
     public class ApplicationUser : IdentityUser
     {

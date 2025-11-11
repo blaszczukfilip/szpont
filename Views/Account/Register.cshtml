@@ -2,52 +2,124 @@
 @{
     ViewData["Title"] = "Register";
 }
+<style>
+    body {
+        background-color: #d9d9d9;
+    }
 
-<h2>Register</h2>
-<hr />
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-<form asp-controller="Account" asp-action="Register" method="post">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .card {
+        border: 2px solid #000;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
 
-    <div class="mb-3">
-        <label asp-for="FirstName" class="form-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #000;
+        font-size: 1.8rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .form-control {
+        border: 2px solid #000;
+        border-radius: 4px;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: none;
+    }
+
+    .btn-register {
+        width: 100%;
+        background-color: #007bff;
+        border: none;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 4px;
+        color: white;
+        transition: 0.2s;
+    }
+
+    .btn-register:hover {
+        background-color: #0056b3;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="register-container">
+    <div class="card p-4" style="width: 400px;">
+        <div class="card-header pb-2">
+            Register
+        </div>
+        <div class="card-body">
+            <form asp-controller="Account" asp-action="Register" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="StudentIndex" class="form-label"></label>
+                    <input asp-for="StudentIndex" class="form-control" />
+                    <span asp-validation-for="StudentIndex" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-register">Register</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small>Already have an account?
+                    <a asp-controller="Account" asp-action="Login">Login</a>
+                </small>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="LastName" class="form-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="StudentIndex" class="form-label"></label>
-        <input asp-for="StudentIndex" class="form-control" />
-        <span asp-validation-for="StudentIndex" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="ConfirmPassword" class="form-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

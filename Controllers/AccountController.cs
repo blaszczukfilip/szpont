@@ -54,5 +54,57 @@ namespace szpont.Controllers
 
             return View(vm);
         }
+[HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid email or password");
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+            if (result.Succeeded)
+            {
+                // wstepne przekierowania
+                switch (user.Role)
+                {
+                    case "Administrator":
+                        return RedirectToAction("Index", "AdminDashboard");
+                    case "Dziekan":
+                        return RedirectToAction("Index", "DziekanDashboard");
+                    case "Kierownik":
+                        return RedirectToAction("Index", "KierownikDashboard");
+                    case "Promotor":
+                        return RedirectToAction("Index", "PromotorDashboard");
+                    case "Student":
+                        return RedirectToAction("Index", "StudentDashboard");
+                    default:
+                        return RedirectToAction("Index", "Home");
+                }
+            }
+
+            ModelState.AddModelError("", "Invalid email or password");
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
+
     }
 }

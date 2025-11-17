@@ -12,10 +12,6 @@ namespace szpont.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = string.Empty;
 
-        [Required, MaxLength(50)]
-        [Display(Name = "Role")]
-        public string Role { get; set; } = "User";
-
         [Required, MaxLength(10)]
         [Display(Name = "Student Index")]
         public string StudentIndex { get; set; } = string.Empty;

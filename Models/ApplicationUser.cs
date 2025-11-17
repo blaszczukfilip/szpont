@@ -12,8 +12,7 @@ namespace szpont.Models
         public string FirstName { get; set; } = string.Empty;
         [Required, MaxLength(50)]
         public string LastName { get; set; } = string.Empty;
-        [Required, MaxLength(50)]
-        public string Role { get; set; } = "User";
+
         [Required, MaxLength(50)]
         public string StudentIndex { get; set; } = string.Empty;
 

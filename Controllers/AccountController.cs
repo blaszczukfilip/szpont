@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace szpont.Controllers
             _signInManager = signInManager;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View(new RegisterViewModel());
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterViewModel vm)
         {
             if (!ModelState.IsValid) return View(vm);
@@ -38,13 +41,15 @@ namespace szpont.Controllers
                 Email = vm.Email,
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
-                StudentIndex = vm.StudentIndex,
-                Role = "User"
+                StudentIndex = vm.StudentIndex
             };
 
             var result = await _userManager.CreateAsync(user, vm.Password);
             if (result.Succeeded)
             {
+                // ustawienie domyslnie roli student
+                await _userManager.AddToRoleAsync(user, "student");
+
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
@@ -54,18 +59,17 @@ namespace szpont.Controllers
 
             return View(vm);
         }
-[HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Login() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -77,34 +81,39 @@ namespace szpont.Controllers
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (result.Succeeded)
             {
-                // wstepne przekierowania
-                switch (user.Role)
-                {
-                    case "Administrator":
-                        return RedirectToAction("Index", "AdminDashboard");
-                    case "Dziekan":
-                        return RedirectToAction("Index", "DziekanDashboard");
-                    case "Kierownik":
-                        return RedirectToAction("Index", "KierownikDashboard");
-                    case "Promotor":
-                        return RedirectToAction("Index", "PromotorDashboard");
-                    case "Student":
-                        return RedirectToAction("Index", "StudentDashboard");
-                    default:
-                        return RedirectToAction("Index", "Home");
-                }
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("admin"))
+                    return RedirectToAction("Index", "AdminDashboard");
+                if (roles.Contains("dziekan"))
+                    return RedirectToAction("Index", "DziekanDashboard");
+                if (roles.Contains("kierownik"))
+                    return RedirectToAction("Index", "KierownikDashboard");
+                if (roles.Contains("promotor"))
+                    return RedirectToAction("Index", "PromotorDashboard");
+                if (roles.Contains("student"))
+                    return RedirectToAction("Index", "StudentDashboard");
+
+                // domyślne przekierowanie
+                return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError("", "Invalid email or password");
             return View(model);
         }
 
+        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
-
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

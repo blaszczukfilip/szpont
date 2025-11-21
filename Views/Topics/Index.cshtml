@@ -1,0 +1,217 @@
+@model List<szpont.Models.Topic>
+@{
+    ViewData["Title"] = "Tematy";
+}
+
+<h1>Lista tematów</h1>
+
+<div class="filter-box">
+    <h3>Filtry</h3>
+    <form method="get" action="/Topics/Index">
+        <span>
+            <label>Wyszukaj:</label>
+            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Tytuł lub opis">
+        </span>
+        
+        <p>
+            <label>Typ:</label>
+            <select name="typeFilter">
+                <option value="">Wszystkie typy</option>
+                @if (ViewBag.Types != null)
+                {
+                    @foreach (var type in ViewBag.Types)
+                    {
+                        if (ViewBag.TypeFilter == type)
+                        {
+                            <option value="@type" selected>@type</option>
+                        }
+                        else
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    }
+                }
+            </select>
+        </p>
+        
+        <p>
+            <label>Słowa kluczowe:</label>
+            <input type="text" name="keywordFilter" value="@ViewBag.KeywordFilter" placeholder="Słowa kluczowe">
+        </p>
+        
+        <p>
+            <button type="submit">Filtruj</button>
+            <button type="button" class="clear-button" onclick="window.location='/Topics/Index'">Wyczyść</button>
+        </p>
+    </form>
+</div>
+
+@if (Model != null && Model.Count > 0)
+{
+    <h3>Znalezione tematy (@Model.Count)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Tytuł</th>
+                <th>Typ</th>
+                <th>Opis</th>
+                <th>Słowa kluczowe</th>
+                <th>Data utworzenia</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var topic in Model)
+            {
+                <tr>
+                    <td><strong>@topic.Title</strong></td>
+                    <td>@topic.Type</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(topic.Description))
+                        {
+                            @topic.Description
+                        }
+                        else
+                        {
+                            <span>Brak opisu</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(topic.Keywords))
+                        {
+                            @topic.Keywords
+                        }
+                        else
+                        {
+                            <span>Brak</span>
+                        }
+                    </td>
+                    <td>@topic.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-topics">
+        <p><strong>Brak tematów do wyświetlenia.</strong></p>
+    </div>
+}
+
+<style>
+.filter-box {
+    padding: 25px;
+    margin-bottom: 35px;
+    background: rgba(50, 50, 50, 0.9);
+    border: 1px solid #777;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.filter-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    padding-bottom: 5px;
+    color: #fff;
+}
+
+.filter-box label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #ddd;
+}
+
+.filter-box input[type="text"],
+.filter-box select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.filter-box input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+.filter-box button[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: 10px;
+}
+
+.filter-box button[type="submit"]:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.clear-button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.clear-button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: rgba(40, 40, 40, 0.95);
+    color: #fff;
+}
+
+th {
+    background-color: rgba(60, 60, 60, 0.95);
+    text-transform: uppercase;
+    color: #fff;
+}
+
+th, td {
+    padding: 14px 18px;
+    text-align: left;
+    border: 1px solid #555;
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: rgba(70, 70, 70, 0.95);
+    transition: background-color 0.2s ease;
+}
+
+td strong {
+    color: #fff;
+}
+
+.no-topics {
+    background-color: #4c2c2c;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e74c3c;
+    color: #f99;
+    font-weight: 500;
+    text-align: center;
+}
+</style>

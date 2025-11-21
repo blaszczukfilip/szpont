@@ -10,5 +10,7 @@ namespace szpont.Data
             : base(options)
         {
         }
+
+        public DbSet<Topic> Topics { get; set; }
     }
 }

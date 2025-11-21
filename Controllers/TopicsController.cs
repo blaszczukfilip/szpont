@@ -1,0 +1,53 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using szpont.Data;
+using szpont.Models;
+
+namespace szpont.Controllers
+{
+    public class TopicsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public TopicsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public IActionResult Index(string searchTerm, string typeFilter, string keywordFilter)
+        {
+            var topics = _context.Topics.AsQueryable();
+
+            // filtrowanie po tekscie (tytul/opis)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                topics = topics.Where(t => t.Title.Contains(searchTerm) || t.Description.Contains(searchTerm));
+            }
+
+            // filtrotwanie po typie
+            if (!string.IsNullOrWhiteSpace(typeFilter))
+            {
+                topics = topics.Where(t => t.Type == typeFilter);
+            }
+
+            // filtrowanie po keywordach
+            if (!string.IsNullOrWhiteSpace(keywordFilter))
+            {
+                topics = topics.Where(t => t.Keywords.Contains(keywordFilter));
+            }
+
+            // pobranie unikalnych typow dla filtra do dropdownu w widoku
+            var types = _context.Topics.Select(t => t.Type).Distinct().OrderBy(t => t).ToList();
+
+            // dane przekazywane do widoku
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.TypeFilter = typeFilter;
+            ViewBag.KeywordFilter = keywordFilter;
+            ViewBag.Types = types;
+
+            // lista tematow posortowana po dacie
+            var topicsList = topics.OrderByDescending(t => t.CreatedDate).ToList();
+            return View(topicsList);
+        }
+    }
+}

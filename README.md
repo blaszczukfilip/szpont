@@ -29,6 +29,10 @@ Aplikacja SZPONT (System Zarządzania Tematami Prac Dyplomowych) to centralna pl
 * **Git**
 * Serwer bazodanowy (**PostgreSQL** lub **SQL Server**)
 
+### Konto administratora
+* E-mail: admin@szpont.local
+* Hasło: Admin123!
+
 ### Instrukcja Uruchomienia SZPONT
 1.  **Klonowanie Repozytorium:**
     ```bash

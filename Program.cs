@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using szpont.Data;
 using szpont.Models;
+using szpont.Services;
 
 namespace szpont
 {
@@ -37,6 +38,9 @@ namespace szpont
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+            builder.Services.AddTransient<szpont.Services.IEmailSender, SmtpEmailSender>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

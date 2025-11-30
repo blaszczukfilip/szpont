@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using szpont.Models;
+using szpont.Services;
 
 namespace szpont.Controllers
 {
@@ -10,11 +11,13 @@ namespace szpont.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, szpont.Services.IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         [AllowAnonymous]
@@ -115,5 +118,90 @@ namespace szpont.Controllers
         {
             return View();
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgetPassword model) {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetUrl = Url.Action(
+                "ResetPassword",
+                "Account",
+                new { email = user.Email, token},
+                protocol: HttpContext.Request.Scheme);
+
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                "Reset hasła",
+                $"Kliknij <a href=\"{resetUrl}\">tutaj</a>, aby zresetować hasło.");
+
+                return RedirectToAction("ForgotPasswordConfirmation");
+        }
+         [AllowAnonymous]
+         public IActionResult ForgotPasswordConfirmation()
+         {
+            return View();
+         }
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (email == null || token == null)
+            {
+                return RedirectToAction("Login");
+            }
+            var model = new ResetPassword
+            {
+                Email = email,
+                Token = token
+            };
+            return View(model);
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPassword model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return RedirectToAction("ResetPasswordConfirmation");
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (result.Succeeded)
+                return RedirectToAction("ResetPasswordConfirmation");
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
+
+            return View(model);
+        }
+
+        [AllowAnonymous]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
+
+
     }
 }

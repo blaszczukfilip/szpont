@@ -66,7 +66,8 @@ namespace szpont
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                await RoleSeeder.SeedAsync(services); // to stworzy role i admina
+                await RoleSeeder.SeedAsync(services); // to stworzy role i admina     
+                await TopicSeeder.SeedAsync(services);      
             }
 
             app.MapControllerRoute(

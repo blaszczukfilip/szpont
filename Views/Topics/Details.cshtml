@@ -14,12 +14,18 @@
     <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
 </div>
 
-<form id="deleteForm" asp-action="Delete" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
+<div class="action-buttons" style="margin-top:10px;">
+    <form asp-action="Edit" method="get" style="display:inline;">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn-delete">Edytuj</button>
+    </form>
 
-    <button type="button" id="deleteBtn">Usuń</button>
-</form>
+    <form id="deleteForm" asp-action="Delete" method="post" style="display:inline;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <button type="button" id="deleteBtn" class="btn-delete">Usuń</button>
+    </form>
+</div>
 
 <!--okienko do potwierdzenia-->
 <div id="popupBg" class="popup-bg" style="display:none;">

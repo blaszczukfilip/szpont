@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using szpont.Data;
@@ -95,6 +96,7 @@ namespace szpont.Controllers
             return View(topic);
         }
 
+        [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -108,6 +110,7 @@ namespace szpont.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords")] Topic topic)
         {
             if (id != topic.Id)

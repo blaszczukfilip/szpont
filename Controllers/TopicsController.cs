@@ -124,5 +124,29 @@ namespace szpont.Controllers
             }
             return View(topic);
         }
+
+        [Authorize(Roles = RoleNames.Promotor)]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Promotor)]
+        public async Task<IActionResult> Create([Bind("Title,Description,Type,Keywords")] Topic model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.CreatedDate = DateTime.Now;
+            _context.Topics.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Nowy temat został dodany.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

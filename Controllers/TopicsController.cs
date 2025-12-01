@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using szpont.Data;
@@ -14,10 +15,10 @@ namespace szpont.Controllers
             _context = context;
         }
 
+        // GET: Topics
         public IActionResult Index(string searchTerm, string typeFilter, string keywordFilter)
         {
             var topics = _context.Topics.AsQueryable();
-
 
             // filtrowanie po tekscie (tytul/opis)
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -51,21 +52,54 @@ namespace szpont.Controllers
             return View(topicsList);
         }
 
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Topics/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var topic = await _context.Topics
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (topic == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+
+            var topic = await _context.Topics.FirstOrDefaultAsync(m => m.Id == id);
+            if (topic == null) return NotFound();
+
             return View(topic);
         }
 
+        // GET: Topics/Create
+        [Authorize(Roles = RoleNames.Promotor)]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Topics/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleNames.Promotor)]
+        public async Task<IActionResult> Create([Bind("Title,Description,Type,Keywords")] Topic model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.CreatedDate = DateTime.Now;
+            _context.Topics.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Nowy temat został dodany.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var topic = await _context.Topics.FirstOrDefaultAsync(m => m.Id == id);
+            if (topic == null) return NotFound();
+
+            return View(topic);
+        }
+
+        // POST: Topics/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -77,26 +111,6 @@ namespace szpont.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
-
-
-        }
-
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var topic = await _context.Topics
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (topic == null)
-            {
-                return NotFound();
-            }
-            return View(topic);
-
-
         }
     }
 }

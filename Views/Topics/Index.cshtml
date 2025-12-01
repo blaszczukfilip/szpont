@@ -3,8 +3,17 @@
     ViewData["Title"] = "Tematy";
 }
 
+
 <h1>Lista tematów</h1>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Promotor"))
+{
+    <p><a asp-action="Create" class="btn btn-primary" style="margin-bottom:15px;">Dodaj nowy temat</a></p>
+}
 <div class="filter-box">
     <h3>Filtry</h3>
     <form method="get" action="/Topics/Index">

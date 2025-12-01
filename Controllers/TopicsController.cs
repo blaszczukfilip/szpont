@@ -18,6 +18,7 @@ namespace szpont.Controllers
         {
             var topics = _context.Topics.AsQueryable();
 
+
             // filtrowanie po tekscie (tytul/opis)
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -48,6 +49,54 @@ namespace szpont.Controllers
             // lista tematow posortowana po dacie
             var topicsList = topics.OrderByDescending(t => t.CreatedDate).ToList();
             return View(topicsList);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var topic = await _context.Topics
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (topic == null)
+            {
+                return NotFound();
+            }
+            return View(topic);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var topic = await _context.Topics.FindAsync(id);
+            if (topic != null)
+            {
+                _context.Topics.Remove(topic);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+
+
+        }
+
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var topic = await _context.Topics
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (topic == null)
+            {
+                return NotFound();
+            }
+            return View(topic);
+
+
         }
     }
 }

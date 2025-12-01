@@ -1,0 +1,123 @@
+﻿@model szpont.Models.Topic
+
+@{
+    ViewData["Title"] = "Szczegóły tematu";
+}
+
+<h2>Szczegóły tematu</h2>
+
+<div class="box">
+    <p><strong>Tytuł:</strong> @Model.Title</p>
+    <p><strong>Typ:</strong> @Model.Type</p>
+    <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
+    <p><strong>Słowa kluczowe:</strong> @(string.IsNullOrEmpty(Model.Keywords) ? "Brak" : Model.Keywords)</p>
+    <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
+</div>
+
+<form id="deleteForm" asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <button type="button" id="deleteBtn">Usuń</button>
+</form>
+
+<!--okienko do potwierdzenia-->
+<div id="popupBg" class="popup-bg" style="display:none;">
+    <div class="popup-box">
+        <h3>Usunąć temat?</h3>
+        <p>Czy na pewno chcesz usunąć ten temat? Tej operacji nie można cofnąć.</p>
+
+        <div class="popup-buttons">
+            <button type="button" id="popupYes" class="btn-yes">Usuń</button>
+            <button type="button" id="popupNo" class="btn-no">Anuluj</button>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .box {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: rgba(40, 40, 40, 0.95);
+        color: #fff;
+        border: 1px solid #555;
+    }
+
+    .popup-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .popup-box {
+        background-color: #1f1f1f;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #555;
+        width: 300px;
+        color: #fff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .popup-buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn-yes {
+        background-color: #e74c3c;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .btn-yes:hover {
+            background-color: #c0392b;
+        }
+
+    .btn-no {
+        background-color: #7f8c8d;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .btn-no:hover {
+            background-color: #636e72;
+        }
+</style>
+
+<script>
+    const deleteBtn = document.getElementById('deleteBtn');
+    const popupBg = document.getElementById('popupBg');
+    const popupYes = document.getElementById('popupYes');
+    const popupNo = document.getElementById('popupNo');
+    const deleteForm = document.getElementById('deleteForm');
+
+    deleteBtn.addEventListener('click', function () {
+        popupBg.style.display = 'flex';
+    });
+
+    popupNo.addEventListener('click', function () {
+        popupBg.style.display = 'none';
+    });
+
+    popupYes.addEventListener('click', function () {
+        deleteForm.submit();
+    });
+</script>

@@ -1,0 +1,111 @@
+﻿@model szpont.Models.Topic
+
+@{
+    ViewData["Title"] = "Edytuj temat";
+}
+
+<h2>Edytuj temat</h2>
+
+<form id="editForm" asp-action="Edit" method="post">
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Type"></label>
+        <input asp-for="Type" class="form-control" />
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Keywords"></label>
+        <input asp-for="Keywords" class="form-control" />
+    </div>
+
+    <input type="hidden" asp-for="Id" />
+
+    <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+    </div>
+</form>
+
+<div id="successPopup" class="popup-bg" style="display:none;">
+    <div class="popup-box">
+        <p>Zmiany zostały zapisane!</p>
+        <button id="closePopup" class="btn btn-primary">OK</button>
+    </div>
+</div>
+
+<style>
+    .form-control {
+        background-color: #333333;
+        color: #ffffff;
+        border: 1px solid #555555;
+    }
+
+        .form-control:focus {
+            background-color: #444444;
+            color: #ffffff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+    .popup-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .popup-box {
+        background-color: #1f1f1f;
+        color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const editForm = document.getElementById('editForm');
+        const successPopup = document.getElementById('successPopup');
+        const closePopup = document.getElementById('closePopup');
+
+        function isFormValid() {
+            return $(editForm).valid();
+        }
+
+        editForm.addEventListener('submit', function(e){
+            e.preventDefault();
+
+            if(isFormValid()){
+                successPopup.style.display = 'flex';
+            }
+        });
+
+        closePopup.addEventListener('click', function(){
+            successPopup.style.display = 'none';
+            editForm.submit();
+        });
+    </script>
+}

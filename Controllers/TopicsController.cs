@@ -51,7 +51,7 @@ namespace szpont.Controllers
             var topicsList = topics.OrderByDescending(t => t.CreatedDate).ToList();
             return View(topicsList);
         }
-
+        [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -69,6 +69,7 @@ namespace szpont.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var topic = await _context.Topics.FindAsync(id);

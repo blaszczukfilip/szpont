@@ -77,8 +77,6 @@ namespace szpont.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
-
-
         }
 
 
@@ -95,8 +93,33 @@ namespace szpont.Controllers
                 return NotFound();
             }
             return View(topic);
+        }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+                return NotFound();
 
+            var topic = await _context.Topics.FindAsync(id);
+            if (topic == null)
+                return NotFound();
+
+            return View(topic);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords")] Topic topic)
+        {
+            if (id != topic.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(topic); 
+                await _context.SaveChangesAsync(); 
+                return RedirectToAction(nameof(Index));
+            }
+            return View(topic);
         }
     }
 }

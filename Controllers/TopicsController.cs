@@ -126,7 +126,7 @@ namespace szpont.Controllers
             return View(topic);
         }
 
-        [Authorize(Roles = RoleNames.Promotor)]
+        [Authorize(Roles = "promotor, admin")]
         public IActionResult Create()
         {
             return View();
@@ -134,7 +134,7 @@ namespace szpont.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Promotor)]
+        [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> Create([Bind("Title,Description,Type,Keywords")] Topic model)
         {
             if (!ModelState.IsValid)

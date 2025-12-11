@@ -5,7 +5,7 @@
 }
 
 <h2>Szczegóły tematu</h2>
-@if (User.IsInRole("promotor") || User.IsInRole("admin")){
+@{
     <div class="box">
         <p><strong>Tytuł:</strong> @Model.Title</p>
         <p><strong>Typ:</strong> @Model.Type</p>

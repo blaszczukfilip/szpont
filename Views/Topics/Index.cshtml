@@ -9,7 +9,8 @@
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
-@if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Promotor"))
+
+@if (User?.Identity?.IsAuthenticated == true && (User.IsInRole("Promotor")) || User.IsInRole("Admin"))
 {
     <p><a asp-action="Create" class="btn btn-primary" style="margin-bottom:15px;">Dodaj nowy temat</a></p>
 }
@@ -51,6 +52,7 @@
         <p>
             <button type="submit">Filtruj</button>
             <button type="button" class="clear-button" onclick="window.location='/Topics/Index'">Wyczyść</button>
+            <button type="button" class="clear-button" onclick="window.location='/Topics/Create'">Stwórz</button>
         </p>
     </form>
 </div>

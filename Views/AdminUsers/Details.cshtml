@@ -1,0 +1,74 @@
+@model szpont.Controllers.UserDetailsViewModel
+@{
+    ViewData["Title"] = "Szczegóły użytkownika";
+}
+
+<h2>Szczegóły użytkownika</h2>
+
+<div class="box">
+    <p><strong>Imię:</strong> @Model.User.FirstName</p>
+    <p><strong>Nazwisko:</strong> @Model.User.LastName</p>
+    <p><strong>Email:</strong> @Model.User.Email</p>
+    <p><strong>Nazwa użytkownika:</strong> @Model.User.UserName</p>
+    <p><strong>Indeks studencki:</strong> @Model.User.StudentIndex</p>
+    <p><strong>Email potwierdzony:</strong> @(Model.User.EmailConfirmed ? "Tak" : "Nie")</p>
+    <p><strong>Role:</strong> 
+        @if (Model.Roles != null && Model.Roles.Any())
+        {
+            @string.Join(", ", Model.Roles)
+        }
+        else
+        {
+            <span>Brak ról</span>
+        }
+    </p>
+    @if (Model.User.LockoutEnd.HasValue && Model.User.LockoutEnd.Value > DateTimeOffset.UtcNow)
+    {
+        <p><strong>Konto zablokowane do:</strong> @Model.User.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm")</p>
+    }
+</div>
+
+<div class="action-buttons" style="margin-top:10px;">
+    <a href="@Url.Action("Index", "AdminUsers")" class="btn-back">Powrót do listy</a>
+</div>
+
+<style>
+    .box {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: rgba(40, 40, 40, 0.95);
+        color: #fff;
+        border: 1px solid #555;
+    }
+
+    .box p {
+        margin: 10px 0;
+        padding: 5px 0;
+        border-bottom: 1px solid #555;
+    }
+
+    .box p:last-child {
+        border-bottom: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-back {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background-color: #2980b9;
+    }
+</style>
+

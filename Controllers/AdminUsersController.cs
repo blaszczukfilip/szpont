@@ -1,0 +1,137 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using szpont.Data;
+using szpont.Models;
+
+namespace szpont.Controllers
+{
+    [Authorize(Roles = "admin")]
+    public class AdminUsersController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
+
+        public AdminUsersController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext context)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index(
+            string searchTerm,
+            string roleFilter,
+            int page = 1,
+            //na pojedynczej stronie 10 użytkowników
+            int pageSize = 10)
+        {
+            var users = _userManager.Users.AsQueryable();
+
+            //filotrwanie po tekscie - string (imię, nazwisko, email, indeks)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                users = users.Where(u =>
+                    u.FirstName.Contains(searchTerm) ||
+                    u.LastName.Contains(searchTerm) ||
+                    u.Email.Contains(searchTerm) ||
+                    u.StudentIndex.Contains(searchTerm));
+            }
+
+            //filtrowanie po roli
+            if (!string.IsNullOrWhiteSpace(roleFilter))
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(roleFilter);
+                var userIdsInRole = usersInRole.Select(u => u.Id).ToList();
+                users = users.Where(u => userIdsInRole.Contains(u.Id));
+            }
+
+            //pobranie ról
+            var roles = await _roleManager.Roles.Select(r => r.Name!).OrderBy(r => r).ToListAsync();
+
+            //liczba użytkowników (potrzebne do paginacji)
+            var totalCount = await users.CountAsync();
+
+            //paginacja
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            page = Math.Max(1, Math.Min(page, totalPages == 0 ? 1 : totalPages));
+
+            var usersList = await users
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            //pobranie ról dla każdego użytkownika (ViewModel)
+            var usersWithRoles = new List<UserWithRolesViewModel>();
+            foreach (var user in usersList)
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+                usersWithRoles.Add(new UserWithRolesViewModel
+                {
+                    User = user,
+                    Roles = userRoles.ToList()
+                });
+            }
+
+            //dane przekazywane do widoku
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.RoleFilter = roleFilter;
+            ViewBag.Roles = roles;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
+
+            return View(usersWithRoles);
+        }
+
+        public async Task<IActionResult> Details(string? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var allRoles = await _roleManager.Roles.Select(r => r.Name!).OrderBy(r => r).ToListAsync();
+
+            var viewModel = new UserDetailsViewModel
+            {
+                User = user,
+                Roles = userRoles.ToList(),
+                AllRoles = allRoles
+            };
+
+            return View(viewModel);
+        }
+    }
+
+    //ViewModel dla listy użytkowników z rolami - wykorzystane w Index
+    public class UserWithRolesViewModel
+    {
+        public ApplicationUser User { get; set; } = null!;
+        public List<string> Roles { get; set; } = new();
+    }
+
+    //ViewModel dla szczegółów użytkownika - wykorzystane w Details
+    public class UserDetailsViewModel
+    {
+        public ApplicationUser User { get; set; } = null!;
+        public List<string> Roles { get; set; } = new();
+        public List<string> AllRoles { get; set; } = new();
+    }
+}
+

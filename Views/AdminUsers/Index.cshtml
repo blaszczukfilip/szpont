@@ -1,0 +1,291 @@
+@model List<szpont.Controllers.UserWithRolesViewModel>
+@{
+    ViewData["Title"] = "Zarządzanie użytkownikami";
+}
+
+<h1>Lista użytkowników</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="filter-box">
+    <h3>Filtry</h3>
+    <form method="get" action="/AdminUsers/Index">
+        <span>
+            <label>Wyszukaj:</label>
+            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Imię, nazwisko, email lub indeks">
+        </span>
+        
+        <p>
+            <label>Rola:</label>
+            <select name="roleFilter">
+                <option value="">Wszystkie role</option>
+                @if (ViewBag.Roles != null)
+                {
+                    @foreach (var role in ViewBag.Roles)
+                    {
+                        if (ViewBag.RoleFilter == role)
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    }
+                }
+            </select>
+        </p>
+        
+        <p>
+            <button type="submit">Filtruj</button>
+            <button type="button" class="clear-button" onclick="window.location='/AdminUsers/Index'">Wyczyść</button>
+        </p>
+    </form>
+</div>
+
+@if (Model != null && Model.Count > 0)
+{
+    <h3>Znalezieni użytkownicy (@ViewBag.TotalCount)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Email</th>
+                <th>Indeks</th>
+                <th>Role</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var userWithRoles in Model)
+            {
+                <tr>
+                    <td><strong>@userWithRoles.User.FirstName</strong></td>
+                    <td><strong>@userWithRoles.User.LastName</strong></td>
+                    <td>@userWithRoles.User.Email</td>
+                    <td>@userWithRoles.User.StudentIndex</td>
+                    <td>
+                        @if (userWithRoles.Roles != null && userWithRoles.Roles.Any())
+                        {
+                            @string.Join(", ", userWithRoles.Roles)
+                        }
+                        else
+                        {
+                            <span>Brak ról</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Details", "AdminUsers", new { id = userWithRoles.User.Id })" class="btn-details">Szczegóły</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* Paginacja *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <a href="@Url.Action("Index", new { searchTerm = ViewBag.SearchTerm, roleFilter = ViewBag.RoleFilter, page = ViewBag.CurrentPage - 1 })" class="page-link">« Poprzednia</a>
+            }
+
+            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+            {
+                if (i == ViewBag.CurrentPage)
+                {
+                    <span class="page-link current">@i</span>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", new { searchTerm = ViewBag.SearchTerm, roleFilter = ViewBag.RoleFilter, page = i })" class="page-link">@i</a>
+                }
+            }
+
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <a href="@Url.Action("Index", new { searchTerm = ViewBag.SearchTerm, roleFilter = ViewBag.RoleFilter, page = ViewBag.CurrentPage + 1 })" class="page-link">Następna »</a>
+            }
+        </div>
+        <p class="pagination-info">Strona @ViewBag.CurrentPage z @ViewBag.TotalPages (łącznie @ViewBag.TotalCount użytkowników)</p>
+    }
+}
+else
+{
+    <div class="no-users">
+        <p><strong>Brak użytkowników do wyświetlenia.</strong></p>
+    </div>
+}
+
+<style>
+.filter-box {
+    padding: 25px;
+    margin-bottom: 35px;
+    background: rgba(50, 50, 50, 0.9);
+    border: 1px solid #777;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.filter-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    padding-bottom: 5px;
+    color: #fff;
+}
+
+.filter-box label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #ddd;
+}
+
+.filter-box input[type="text"],
+.filter-box select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.filter-box input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+.filter-box button[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: 10px;
+}
+
+.filter-box button[type="submit"]:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.clear-button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.clear-button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: rgba(40, 40, 40, 0.95);
+    color: #fff;
+}
+
+th {
+    background-color: rgba(60, 60, 60, 0.95);
+    text-transform: uppercase;
+    color: #fff;
+}
+
+th, td {
+    padding: 14px 18px;
+    text-align: left;
+    border: 1px solid #555;
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: rgba(70, 70, 70, 0.95);
+    transition: background-color 0.2s ease;
+}
+
+td strong {
+    color: #fff;
+}
+
+.btn-details {
+    background-color: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-details:hover {
+    background-color: #2980b9;
+}
+
+.no-users {
+    background-color: #4c2c2c;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e74c3c;
+    color: #f99;
+    font-weight: 500;
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    background-color: rgba(60, 60, 60, 0.95);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #555;
+    transition: background-color 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #3498db;
+}
+
+.page-link.current {
+    background-color: #3498db;
+    font-weight: bold;
+    cursor: default;
+}
+
+.pagination-info {
+    text-align: center;
+    color: #ddd;
+    margin-top: 10px;
+}
+</style>
+

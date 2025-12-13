@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using szpont.Data;
 using szpont.Models;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace szpont.Controllers
 {
@@ -117,6 +119,121 @@ namespace szpont.Controllers
 
             return View(viewModel);
         }
+
+        public async Task<IActionResult> Edit(string? id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var allRoles = await _roleManager.Roles
+                .Select(r => r.Name!)
+                .OrderBy(r => r)
+                .ToListAsync();
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var viewModel = new EditUserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email ?? string.Empty,
+                Role = userRoles.FirstOrDefault() ?? string.Empty
+            };
+
+            ViewBag.Roles = allRoles;
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditUserViewModel model)
+        {
+            var allRoles = await _roleManager.Roles
+                .Select(r => r.Name!)
+                .OrderBy(r => r)
+                .ToListAsync();
+
+            ViewBag.Roles = allRoles;
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (!model.Email.Contains('.') || model.Email.EndsWith("."))
+            {
+                ModelState.AddModelError(nameof(model.Email), "Email musi zawierać domenę, np. .pl lub .com");
+                return View(model);
+            }
+
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Role) || !allRoles.Contains(model.Role))
+            {
+                ModelState.AddModelError(nameof(model.Role), "Wybrana rola nie istnieje.");
+                return View(model);
+            }
+            // aktualizacja danych
+            user.FirstName = model.FirstName.Trim();
+            user.LastName = model.LastName.Trim();
+            user.Email = model.Email.Trim();
+            user.UserName = model.Email.Trim();
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            // zmiana roli
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            if (currentRoles.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeResult.Succeeded)
+                {
+                    foreach (var error in removeResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(model);
+                }
+            }
+
+            var addResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!addResult.Succeeded)
+            {
+                foreach (var error in addResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Zapisano zmiany użytkownika.";
+            return RedirectToAction("Details", new { id = user.Id });
+        }
+
     }
 
     //ViewModel dla listy użytkowników z rolami - wykorzystane w Index
@@ -133,5 +250,28 @@ namespace szpont.Controllers
         public List<string> Roles { get; set; } = new();
         public List<string> AllRoles { get; set; } = new();
     }
+
+    // ViewModel dla edycji uzytkownika
+    public class EditUserViewModel
+    {
+        [Required(ErrorMessage = "Imię jest wymagane")]
+        [MaxLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Nazwisko jest wymagane")]
+        [MaxLength(50)]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email jest wymagany")]
+        [EmailAddress(ErrorMessage = "Niepoprawny format email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Rola jest wymagana")]
+        public string Role { get; set; } = string.Empty;
+
+        [Required]
+        public string Id { get; set; } = string.Empty;
+    }
+
 }
 

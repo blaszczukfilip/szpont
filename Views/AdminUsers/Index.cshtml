@@ -80,7 +80,9 @@
                     </td>
                     <td>
                         <a href="@Url.Action("Details", "AdminUsers", new { id = userWithRoles.User.Id })" class="btn-details">Szczegóły</a>
+                        <a href="@Url.Action("Edit", "AdminUsers", new { id = userWithRoles.User.Id })" class="btn-edit">Edytuj</a>
                     </td>
+
                 </tr>
             }
         </tbody>
@@ -287,5 +289,22 @@ td strong {
     color: #ddd;
     margin-top: 10px;
 }
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    margin-left: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit:hover {
+    background-color: #d68911;
+}
+
+
 </style>
 

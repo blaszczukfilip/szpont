@@ -53,22 +53,26 @@ namespace szpont.Controllers
             var allTopics = await _context.Topics.ToListAsync();
             viewModel.TotalTopics = allTopics.Count;
 
-            viewModel.EngineeringTopics = allTopics.Count(t => t.Type.Contains("Inżynierska", StringComparison.OrdinalIgnoreCase));
-            viewModel.MastersTopics = allTopics.Count(t => t.Type.Contains("Magisterska", StringComparison.OrdinalIgnoreCase));
-
             // Grupowanie tematów według typu
             viewModel.TopicsByType = allTopics
                 .GroupBy(t => t.Type)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            // Grupowanie użytkowników według roli
-            viewModel.UsersByRole = new Dictionary<string, int>
+            // Główne statystyki dla kart - tylko 2 karty
+            viewModel.MainStats = new Dictionary<string, (int Value, string CssClass)>
             {
-                { "Student", viewModel.TotalStudents },
-                { "Admin", viewModel.TotalAdmins },
-                { "Promotor", viewModel.TotalPromotors },
-                { "Dziekan", viewModel.TotalDziekans },
-                { "Kierownik", viewModel.TotalKierowniks }
+                { "Wszyscy użytkownicy", (viewModel.TotalUsers, "stat-card-users") },
+                { "Tematy", (viewModel.TotalTopics, "stat-card-topics") }
+            };
+
+            // Szczegółowe statystyki użytkowników
+            viewModel.UserRoleStats = new Dictionary<string, int>
+            {
+                { "Studenci", viewModel.TotalStudents },
+                { "Administratorzy", viewModel.TotalAdmins },
+                { "Promotorzy", viewModel.TotalPromotors },
+                { "Dziekani", viewModel.TotalDziekans },
+                { "Kierownicy", viewModel.TotalKierowniks }
             };
 
             return View("~/Views/Dashboards/AdminDashboard/Index.cshtml", viewModel);

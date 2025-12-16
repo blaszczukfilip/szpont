@@ -1,7 +1,212 @@
+@model szpont.Models.AdminDashboardViewModel
 @{
     ViewData["Title"] = "Panel administratora";
 }
 
-<h1>Panel administratora</h1>
-<p>Witamy w panelu administratora. Dostęp tylko dla roli <strong>admin</strong>.</p>
+<h1 class="mb-4">Panel administratora</h1>
+
+<!-- Karty ze statystykami -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: rgba(118, 186, 255, 0.2); border: 1px solid rgba(118, 186, 255, 0.3);">
+            <div class="card-body">
+                <h5 class="card-title">Studenci</h5>
+                <h2 class="mb-0">@Model.TotalStudents</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: rgba(118, 250, 255, 0.2); border: 1px solid rgba(118, 250, 255, 0.3);">
+            <div class="card-body">
+                <h5 class="card-title">Tematy</h5>
+                <h2 class="mb-0">@Model.TotalTopics</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: rgba(255, 186, 118, 0.2); border: 1px solid rgba(255, 186, 118, 0.3);">
+            <div class="card-body">
+                <h5 class="card-title">Inżynierskie</h5>
+                <h2 class="mb-0">@Model.EngineeringTopics</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: rgba(255, 118, 186, 0.2); border: 1px solid rgba(255, 118, 186, 0.3);">
+            <div class="card-body">
+                <h5 class="card-title">Magisterskie</h5>
+                <h2 class="mb-0">@Model.MastersTopics</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wykresy -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Rozkład tematów według typu</h5>
+                <canvas id="topicsChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Rozkład użytkowników według roli</h5>
+                <canvas id="usersChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dodatkowe statystyki -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Szczegółowe statystyki użytkowników</h5>
+                <div class="row">
+                    <div class="col-md-2 text-center mb-2">
+                        <div class="p-3" style="background: rgba(118, 186, 255, 0.1); border-radius: 8px;">
+                            <h6>Wszyscy użytkownicy</h6>
+                            <h4>@Model.TotalUsers</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-2">
+                        <div class="p-3" style="background: rgba(118, 250, 255, 0.1); border-radius: 8px;">
+                            <h6>Administratorzy</h6>
+                            <h4>@Model.TotalAdmins</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-2">
+                        <div class="p-3" style="background: rgba(255, 186, 118, 0.1); border-radius: 8px;">
+                            <h6>Promotorzy</h6>
+                            <h4>@Model.TotalPromotors</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-2">
+                        <div class="p-3" style="background: rgba(255, 118, 186, 0.1); border-radius: 8px;">
+                            <h6>Dziekani</h6>
+                            <h4>@Model.TotalDziekans</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-2">
+                        <div class="p-3" style="background: rgba(186, 118, 255, 0.1); border-radius: 8px;">
+                            <h6>Kierownicy</h6>
+                            <h4>@Model.TotalKierowniks</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Wykres tematów
+        const topicsCtx = document.getElementById('topicsChart').getContext('2d');
+        const topicsData = {
+            labels: [@Html.Raw(Model.TopicsByType.Any() ? string.Join(", ", Model.TopicsByType.Keys.Select(k => $"'{k.Replace("'", "\\'")}'")) : "''")],
+            datasets: [{
+                label: 'Liczba tematów',
+                data: [@(Model.TopicsByType.Any() ? string.Join(", ", Model.TopicsByType.Values) : "0")],
+                backgroundColor: [
+                    'rgba(118, 186, 255, 0.6)',
+                    'rgba(118, 250, 255, 0.6)',
+                    'rgba(255, 186, 118, 0.6)',
+                    'rgba(255, 118, 186, 0.6)',
+                    'rgba(186, 118, 255, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(118, 186, 255, 1)',
+                    'rgba(118, 250, 255, 1)',
+                    'rgba(255, 186, 118, 1)',
+                    'rgba(255, 118, 186, 1)',
+                    'rgba(186, 118, 255, 1)'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        new Chart(topicsCtx, {
+            type: 'doughnut',
+            data: topicsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#f1f1f1'
+                        },
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Wykres użytkowników
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        const usersData = {
+            labels: [@Html.Raw(Model.UsersByRole.Any() ? string.Join(", ", Model.UsersByRole.Keys.Select(k => $"'{k.Replace("'", "\\'")}'")) : "''")],
+            datasets: [{
+                label: 'Liczba użytkowników',
+                data: [@(Model.UsersByRole.Any() ? string.Join(", ", Model.UsersByRole.Values) : "0")],
+                backgroundColor: [
+                    'rgba(118, 186, 255, 0.6)',
+                    'rgba(118, 250, 255, 0.6)',
+                    'rgba(255, 186, 118, 0.6)',
+                    'rgba(255, 118, 186, 0.6)',
+                    'rgba(186, 118, 255, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(118, 186, 255, 1)',
+                    'rgba(118, 250, 255, 1)',
+                    'rgba(255, 186, 118, 1)',
+                    'rgba(255, 118, 186, 1)',
+                    'rgba(186, 118, 255, 1)'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        new Chart(usersCtx, {
+            type: 'bar',
+            data: usersData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#f1f1f1',
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#f1f1f1'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
 

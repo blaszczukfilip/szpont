@@ -1,0 +1,39 @@
+﻿@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Potwierdzenie blokady";
+}
+
+<h2>Potwierdzenie blokady</h2>
+
+<div class="alert alert-danger">
+    <p>
+        Czy na pewno chcesz <strong>zablokować</strong> użytkownika:
+    </p>
+    <ul>
+        <li><strong>@Model.FirstName @Model.LastName</strong></li>
+        <li>Email: @Model.Email</li>
+    </ul>
+</div>
+
+<form asp-action="BlockConfirmed" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="mb-3">
+        <label for="lockoutDuration">Czas blokady (w godzinach):</label>
+        <input type="number" class="form-control" name="lockoutHours" id="lockoutDuration" value="1" min="1" max="8760" />
+        <small class="form-text text-muted">Podaj liczbę godzin, przez które użytkownik ma być zablokowany.</small>
+    </div>
+
+    <button type="submit" class="btn btn-danger">
+        Zablokuj
+    </button>
+
+    <a asp-action="Details"
+       asp-route-id="@Model.Id"
+       class="btn btn-secondary">
+        Anuluj
+    </a>
+</form>
+
+

@@ -234,6 +234,53 @@ namespace szpont.Controllers
             return RedirectToAction("Details", new { id = user.Id });
         }
 
+        // blokowanie
+        public async Task<IActionResult> Block(string? id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            return View(user);
+        }
+
+        // potwierdzenie blokady
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BlockConfirmed(string id, int lockoutHours)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            if (!user.LockoutEnabled)
+                user.LockoutEnabled = true;
+
+            var lockoutEnd = DateTimeOffset.UtcNow.AddHours(lockoutHours);
+            await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+
+        // odblokowanie
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unblock(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            await _userManager.SetLockoutEndDateAsync(user, null);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+
     }
 
     //ViewModel dla listy użytkowników z rolami - wykorzystane w Index

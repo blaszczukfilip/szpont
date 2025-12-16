@@ -81,6 +81,13 @@ namespace szpont.Controllers
                 return View(model);
             }
 
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = user.LockoutEnd ?? DateTimeOffset.UtcNow;
+                ModelState.AddModelError("", $"Konto jest zablokowane do {lockoutEnd.ToLocalTime():dd.MM.yyyy HH:mm}");
+                return View(model);
+            }
+
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (result.Succeeded)
             {

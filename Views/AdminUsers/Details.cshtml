@@ -27,7 +27,7 @@
     {
         <p>
             <strong>Konto zablokowane do:</strong>
-            @lockoutEnd.ToString("dd.MM.yyyy HH:mm")
+            @lockoutEnd.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
         </p>
     }
 </div>

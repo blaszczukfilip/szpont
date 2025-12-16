@@ -50,7 +50,58 @@ Aplikacja SZPONT (System Zarządzania Tematami Prac Dyplomowych) to centralna pl
     ```
     Aplikacja **SZPONT** będzie dostępna pod adresem wskazanym w konsoli.
 
+## 📚 CRUD Tematów Prac Dyplomowych (Topics)
 
+### Model `Topic`
+
+Temat pracy dyplomowej reprezentuje encja `Topic`:
+
+- **Id** – klucz główny (int)
+- **Title** – tytuł tematu (wymagany, max 200 znaków)
+- **Description** – opis tematu (opcjonalny, max 1000 znaków)
+- **Type** – typ pracy (np. „Inżynierska”, „Magisterska”; wymagany, max 50 znaków)
+- **Keywords** – słowa kluczowe rozdzielone przecinkami (max 200 znaków)
+- **CreatedDate** – data utworzenia rekordu (ustawiana automatycznie)
+
+### Dostęp do funkcjonalności (kontroler `TopicsController`)
+
+Funkcje CRUD dla tematów są obsługiwane przez kontroler MVC `TopicsController`:
+
+- **Lista tematów (Read / Index)**  
+  - URL: `GET /Topics`  
+  - Opis: Wyświetla listę wszystkich tematów z możliwością przejścia do szczegółów, edycji lub usunięcia (w zależności od uprawnień).
+
+- **Szczegóły tematu (Read / Details)**  
+  - URL: `GET /Topics/Details/{id}`  
+  - Opis: Wyświetla szczegółowe informacje o wybranym temacie (`Title`, `Description`, `Type`, `Keywords`, `CreatedDate`).  
+  - Zastosowanie: Używane zarówno przez promotorów, jak i studentów do analizy treści tematu.
+
+- **Utworzenie nowego tematu (Create)**  
+  - URL (formularz): `GET /Topics/Create`  
+  - URL (zapis): `POST /Topics/Create`  
+  - Opis: Formularz umożliwia wprowadzenie tytułu, opisu, typu pracy i słów kluczowych. Po poprawnej walidacji dane są zapisywane do bazy (`ApplicationDbContext.Topics`).  
+  - Uprawnienia: Domyślnie przeznaczone dla ról typu **Promotor** / **Administrator** (zgodnie z konfiguracją autoryzacji w projekcie).
+
+- **Edycja istniejącego tematu (Update)**  
+  - URL (formularz): `GET /Topics/Edit/{id}`  
+  - URL (zapis): `POST /Topics/Edit/{id}`  
+  - Opis: Formularz wczytuje bieżące dane tematu i pozwala na ich modyfikację. Po zapisie EF Core aktualizuje rekord w tabeli `Topics`.  
+  - Walidacja: Zachowane są ograniczenia modelu (`[Required]`, `[MaxLength]`).
+
+- **Usunięcie tematu (Delete)**  
+  - URL (potwierdzenie): `GET /Topics/Delete/{id}`  
+  - URL (zapis): `POST /Topics/DeleteConfirmed/{id}` (domyślny wzorzec w ASP.NET Core MVC)  
+  - Opis: Najpierw wyświetlane jest okno potwierdzenia, następnie temat jest usuwany z bazy danych.
+
+### Seed danych tematów (stan początkowy)
+
+Przy pierwszym uruchomieniu aplikacji (lub gdy tabela `Topics` jest pusta) system automatycznie zasila bazę przykładowymi tematami:
+
+- Implementacja znajduje się w klasie `TopicSeeder` (`Data/TopicsSeeder.cs`).
+- Wywołanie seeding-u odbywa się w `Program.cs` podczas startu aplikacji:
+  - `await TopicSeeder.SeedAsync(services);`
+- Seed zawiera **min. 15 zróżnicowanych tematów** (różne typy – inżynierskie/magisterskie, różne dziedziny, bogate słowa kluczowe), co pozwala od razu testować widoki listy, szczegółów, edycji i usuwania tematów.
 
 ---
+
 

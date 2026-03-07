@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace szpont.Models
 {
@@ -21,5 +22,31 @@ namespace szpont.Models
         public string Keywords { get; set; } = string.Empty;
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        [Required]
+        public TopicStatus Status { get; set; } = TopicStatus.Draft;
+
+        [MaxLength(500)]
+        public string? RejectionReason { get; set; }
+
+        public DateTime? SubmittedDate { get; set; }
+
+        public DateTime? ApprovedDate { get; set; }
+
+        [Required]
+        public string PromotorId { get; set; } = string.Empty;
+        
+        public string? KierownikId { get; set; }
+        
+        public string? DziekanId { get; set; }
+
+        [ForeignKey("PromotorId")]
+        public virtual ApplicationUser? Promotor { get; set; }
+
+        [ForeignKey("KierownikId")]
+        public virtual ApplicationUser? Kierownik { get; set; }
+
+        [ForeignKey("DziekanId")]
+        public virtual ApplicationUser? Dziekan { get; set; }
     }
 }

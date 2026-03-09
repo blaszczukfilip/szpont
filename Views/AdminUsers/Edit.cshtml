@@ -42,9 +42,16 @@
                 <option value="">-- wybierz --</option>
                 @if (ViewBag.Roles != null)
                 {
-                    foreach (var role in (List<string>)ViewBag.Roles)
+                    @foreach (var role in (List<string>)ViewBag.Roles)
                     {
-                        <option value="@role" @(role == Model.Role ? "selected" : "")>@role</option>
+                        if (role == Model.Role)
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
                     }
                 }
             </select>

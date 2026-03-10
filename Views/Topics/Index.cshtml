@@ -49,10 +49,10 @@
             <input type="text" name="keywordFilter" value="@ViewBag.KeywordFilter" placeholder="Słowa kluczowe">
         </p>
         
-        <p>
-            <button type="submit">Filtruj</button>
-            <button type="button" class="clear-button" onclick="window.location='/Topics/Index'">Wyczyść</button>
-            <button type="button" class="clear-button" onclick="window.location='/Topics/Create'">Stwórz</button>
+        <p class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">Filtruj</button>
+            <button type="button" class="btn btn-danger btn-lg" onclick="window.location='/Topics/Index'">Wyczyść</button>
+            <button type="button" class="btn btn-success btn-lg" onclick="window.location='/Topics/Create'">Stwórz</button>
         </p>
     </form>
 </div>
@@ -150,39 +150,6 @@ else
 
 .filter-box input[type="text"]::placeholder {
     color: #aaa;
-}
-
-.filter-box button[type="submit"] {
-    background-color: #3498db;
-    color: white;
-    padding: 10px 22px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-right: 10px;
-}
-
-.filter-box button[type="submit"]:hover {
-    background-color: #2980b9;
-    transform: translateY(-2px);
-}
-
-.clear-button {
-    background-color: #e74c3c;
-    color: white;
-    padding: 10px 22px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.clear-button:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
 }
 
 table {

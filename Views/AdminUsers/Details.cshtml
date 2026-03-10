@@ -35,20 +35,20 @@
 <div class="action-buttons" style="margin-top:10px;">
     @if (isLocked)
     {
-        <form asp-action="Unblock" method="post" style="display:inline;">
-            <a href="@Url.Action("Index", "AdminUsers")" class="btn-back">Powrót do listy</a>
+        <form asp-action="Unblock" method="post" style="display:inline;" class="d-flex gap-2 mt-2">
+            <a href="@Url.Action("Index", "AdminUsers")" class="btn btn-primary btn-lg">Powrót do listy</a>
             <input type="hidden" name="id" value="@Model.User.Id" />
-            <button type="submit" class="btn-unblock">
+            <button type="submit" class="btn btn-success btn-lg">
                 Odblokuj
             </button>
         </form>
     }
     else
     {
-        <a href="@Url.Action("Index", "AdminUsers")" class="btn-back">Powrót do listy</a>
+        <a href="@Url.Action("Index", "AdminUsers")" class="btn btn-primary btn-lg">Powrót do listy</a>
         <a asp-action="Block"
            asp-route-id="@Model.User.Id"
-           class="btn-block">
+           class="btn btn-danger btn-lg">
             Zablokuj
         </a>
     }
@@ -78,33 +78,6 @@
         display: flex;
         gap: 10px;
     }
-
-    .btn-back {
-        background-color: #3498db;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-back:hover {
-        background-color: #2980b9;
-    }
-
-    .btn-block {
-        background-color: #e74c3c;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background-color 0.3s ease;
-    }
-
-        .btn-block:hover {
-            background-color: #c0392b;
-        }
 
     .btn-unblock {
         background-color: #2ecc71;

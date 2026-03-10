@@ -1,53 +1,113 @@
 ﻿@model szpont.Controllers.EditUserViewModel
+
 @{
     ViewData["Title"] = "Edycja użytkownika";
 }
 
-<h1>Edycja użytkownika</h1>
+<h2 class="mb-4">Edycja użytkownika</h2>
 
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 
-<form asp-action="Edit" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
+<div class="form-box">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
 
-    <div class="form-group">
-        <label asp-for="FirstName">Imię</label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="form-group">
-        <label asp-for="LastName">Nazwisko</label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
+        <div class="form-field">
+            <label asp-for="FirstName">Imię *</label>
+            <input asp-for="FirstName" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Email">Email</label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+        <div class="form-field">
+            <label asp-for="LastName">Nazwisko *</label>
+            <input asp-for="LastName" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Role">Rola</label>
-        <select asp-for="Role" class="form-control">
-            @if (ViewBag.Roles != null)
-            {
-                foreach (var role in (List<string>)ViewBag.Roles)
+        <div class="form-field">
+            <label asp-for="Email">Email *</label>
+            <input asp-for="Email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-field">
+            <label asp-for="Role">Rola *</label>
+            <select asp-for="Role">
+                <option value="">-- wybierz --</option>
+                @if (ViewBag.Roles != null)
                 {
-                    <option value="@role">@role</option>
+                    @foreach (var role in (List<string>)ViewBag.Roles)
+                    {
+                        if (role == Model.Role)
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    }
                 }
-            }
-        </select>
-        <span asp-validation-for="Role" class="text-danger"></span>
-    </div>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
 
-    <br />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">Zapisz</button>
+            <a href="@Url.Action("Details", "AdminUsers", new { id = Model.Id })" class="btn btn-secondary btn-lg">Anuluj</a>
+        </div>
+    </form>
+</div>
 
-    <button type="submit" class="btn btn-primary">Zapisz</button>
-    <a href="@Url.Action("Details", "AdminUsers", new { id = Model.Id })" class="btn btn-secondary">Anuluj</a>
-</form>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<style>
+.form-box {
+    padding: 25px;
+    margin-bottom: 35px;
+    background: rgba(50, 50, 50, 0.9);
+    border: 1px solid #777;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.form-field {
+    margin-bottom: 20px;
+}
+
+.form-box label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #ddd;
+}
+
+.form-box input,
+.form-box textarea,
+.form-box select {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form-box textarea {
+    resize: vertical;
+}
+
+.form-box input::placeholder {
+    color: #aaa;
+}
+</style>

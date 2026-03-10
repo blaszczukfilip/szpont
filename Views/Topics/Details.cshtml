@@ -14,16 +14,18 @@
         <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
     </div>
 
-    <div class="action-buttons" style="margin-top:10px;">
-        <form asp-action="Edit" method="get" style="display:inline;">
+    
+
+    <div class="d-flex gap-2 action-buttons" style="margin-top:10px;">
+        <form asp-action="Edit" method="get">
             <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn-delete">Edytuj</button>
+            <button type="submit" class="btn btn-warning btn-lg">Edytuj</button>
         </form>
 
-        <form id="deleteForm" asp-action="Delete" method="post" style="display:inline;">
+        <form id="deleteForm" asp-action="Delete" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
-            <button type="button" id="deleteBtn" class="btn-delete">Usuń</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger btn-lg">Usuń</button>
         </form>
     </div>
 
@@ -103,22 +105,9 @@
             cursor: pointer;
         }
 
-            .btn-no:hover {
-                background-color: #636e72;
-            }
-        #deleteBtn{
-            background-color: #e74c3c;
-            color: black;
-            border: 2px solid white;
-            padding: 8px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 100px;
-            box-shadow: 0 0 0 0.1rem rgba(255, 255,255,0.5);
+        .btn-no:hover {
+            background-color: #636e72;
         }
-        #deleteBtn:hover {
-                background-color: #c0392b;
-            }
     </style>
 
     <script>

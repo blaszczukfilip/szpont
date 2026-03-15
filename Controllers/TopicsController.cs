@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using szpont.Data;
 using szpont.Models;
 
@@ -137,6 +138,9 @@ namespace szpont.Controllers
         [Authorize(Roles = "promotor, admin")]
         public async Task<IActionResult> Create([Bind("Title,Description,Type,Keywords")] Topic model)
         {
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            model.PromotorId = userId;
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -148,6 +152,33 @@ namespace szpont.Controllers
 
             TempData["SuccessMessage"] = "Nowy temat został dodany.";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "promotor")]
+        public async Task<IActionResult> SubmitForApproval(int id)
+        {
+            var topic = await _context.Topics.FindAsync(id);
+            var userId = System.Security.Claims.ClaimTypes.NameIdentifier;
+            var currentUserId = User.FindFirst(userId)?.Value;
+
+            if (topic == null) return NotFound();
+            if (topic.PromotorId != currentUserId) return Forbid();
+
+            if (topic.Status != TopicStatus.Draft)
+            {
+                TempData["ErrorMessage"] = "Tylko szkice mogą być wysłane do akceptacji.";
+                return RedirectToAction(nameof(Details), new { id = topic.Id });
+            }
+
+            topic.Status = TopicStatus.WaitingForKierownik;
+            topic.SubmittedDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Temat został wysłany do akceptacji przez Kierownika.";
+
+            return RedirectToAction(nameof(Details), new { id = topic.Id });
         }
     }
 }

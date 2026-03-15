@@ -1,7 +1,156 @@
+@using szpont.Models
+@model IEnumerable<szpont.Models.Topic>
+
 @{
-    ViewData["Title"] = "Panel promotora";
+    ViewData["Title"] = "Panel Promotora";
 }
 
-<h1>Panel promotora</h1>
-<p>Dostęp posiada wyłącznie rola <strong>promotor</strong>.</p>
+<h2>Panel Promotora</h2>
 
+@* Statystyki w boxie *@
+<div class="box">
+    <div style="display: flex; justify-content: space-around; text-align: center;">
+        <div>
+            <p>SZKICE</p>
+            <h3>@ViewBag.CountDraft</h3>
+        </div>
+        <div>
+            <p>W AKCEPTACJI</p>
+            <h3 style="color: #ffc107;">@ViewBag.CountWaiting</h3>
+        </div>
+        <div>
+            <p>ZAAKCEPTOWANE</p>
+            <h3 style="color: #28a745;">@ViewBag.CountApproved</h3>
+        </div>
+        <div>
+            <p>ODRZUCONE</p>
+            <h3 style="color: #e74c3c;">@ViewBag.CountRejected</h3>
+        </div>
+    </div>
+</div>
+
+@* TABELA 1: SZKICE *@
+<h3 class="mt-4">Szkice (Draft)</h3>
+<div class="box">
+    <table class="table" style="color: #fff;">
+        <thead>
+            <tr>
+                <th>TYTUŁ</th>
+                <th>TYP</th>
+                <th>DATA</th>
+                <th>AKCJA</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(t => t.Status == TopicStatus.Draft))
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Type</td>
+                    <td>@item.CreatedDate.ToString("dd.MM.yyyy")</td>
+                    <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Szczegóły</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* TABELA 2: W AKCEPTACJI *@
+<h3 class="mt-4" style="color: #ffc107;">W trakcie akceptacji</h3>
+<div class="box">
+    <table class="table" style="color: #fff;">
+        <thead>
+            <tr>
+                <th>TYTUŁ</th>
+                <th>TYP</th>
+                <th>STATUS</th>
+                <th>AKCJA</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(t => t.Status == TopicStatus.WaitingForKierownik || t.Status == TopicStatus.WaitingForDziekan))
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Type</td>
+                    <td>@item.Status</td>
+                    <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Szczegóły</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* TABELA 3: ZAAKCEPTOWANE *@
+<h3 class="mt-4" style="color: #28a745;">Zatwierdzone</h3>
+<div class="box">
+    <table class="table" style="color: #fff;">
+        <thead>
+            <tr>
+                <th>TYTUŁ</th>
+                <th>TYP</th>
+                <th>DATA</th>
+                <th>AKCJA</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(t => t.Status == TopicStatus.Approved))
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Type</td>
+                    <td>@item.CreatedDate.ToString("dd.MM.yyyy")</td>
+                    <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Szczegóły</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* TABELA 4: ODRZUCONE *@
+<h3 class="mt-4" style="color: #e74c3c;">Odrzucone</h3>
+<div class="box">
+    <table class="table" style="color: #fff;">
+        <thead>
+            <tr>
+                <th>TYTUŁ</th>
+                <th>TYP</th>
+                <th>POWÓD</th>
+                <th>AKCJA</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(t => t.Status == TopicStatus.Rejected))
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Type</td>
+                    <td style="color: #e74c3c;">@item.RejectionReason</td>
+                    <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Szczegóły</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .box {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: rgba(40, 40, 40, 0.95);
+        color: #fff;
+        border: 1px solid #555;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table td, .table th {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+</style>

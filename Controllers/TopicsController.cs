@@ -90,6 +90,9 @@ namespace szpont.Controllers
                 return NotFound();
             }
             var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .Include(t => t.Kierownik)
+                .Include(t => t.Dziekan)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (topic == null)
             {

@@ -1,7 +1,107 @@
+@using szpont.Models
+@model IEnumerable<szpont.Models.Topic>
+
 @{
-    ViewData["Title"] = "Panel dziekana";
+    ViewData["Title"] = "Panel Dziekana";
 }
 
-<h1>Panel dziekana</h1>
+<h2>Panel Dziekana – tematy oczekujące na finalną akceptację</h2>
 <p>Dostęp posiada wyłącznie rola <strong>dziekan</strong>.</p>
+
+<div class="box">
+    <table class="table" style="color: #fff;">
+        <thead>
+            <tr>
+                <th>TYTUŁ</th>
+                <th>TYP</th>
+                <th>PROMOTOR</th>
+                <th>KIEROWNIK</th>
+                <th>
+                    @{
+                        var isAsc = ViewBag.CurrentSort == null || ViewBag.CurrentSort == "date_asc";
+                        var nextSort = isAsc ? "date_desc" : "date_asc";
+                        var arrow = isAsc ? "↑" : "↓";
+                    }
+                    <a asp-action="Index" asp-route-sortOrder="@nextSort" style="color: #fff; text-decoration: none;">
+                        Data wysłania @arrow
+                    </a>
+                </th>
+                <th>AKCJA</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6">Brak tematów oczekujących na akceptację.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.Type</td>
+                        <td>
+                            @if (item.Promotor != null)
+                            {
+                                @($"{item.Promotor.FirstName} {item.Promotor.LastName} ({item.Promotor.Email})")
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.Kierownik != null)
+                            {
+                                @($"{item.Kierownik.FirstName} {item.Kierownik.LastName}")
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                        <td>
+                            @(item.SubmittedDate.HasValue
+                                ? item.SubmittedDate.Value.ToString("dd.MM.yyyy")
+                                : item.CreatedDate.ToString("dd.MM.yyyy"))
+                        </td>
+                        <td>
+                            <a asp-controller="Topics"
+                               asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-primary btn-sm">
+                                Szczegóły
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .box {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: rgba(40, 40, 40, 0.95);
+        color: #fff;
+        border: 1px solid #555;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table td, .table th {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+</style>
 

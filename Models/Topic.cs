@@ -48,5 +48,12 @@ namespace szpont.Models
 
         [ForeignKey("DziekanId")]
         public virtual ApplicationUser? Dziekan { get; set; }
+
+        public string? StudentId { get; set; }
+
+        public DateTime? ReservationDate { get; set; }
+
+        [ForeignKey("StudentId")]
+        public virtual ApplicationUser? Student { get; set; }
     }
 }

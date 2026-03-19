@@ -34,6 +34,12 @@ namespace szpont.Data
                 .WithMany()
                 .HasForeignKey(t => t.DziekanId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Topic>()
+                .HasOne(t => t.Student)
+                .WithMany()
+                .HasForeignKey(t => t.StudentId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

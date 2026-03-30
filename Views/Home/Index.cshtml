@@ -1,5 +1,223 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Strona główna";
 }
 
+<h1>Szpont - System zarządzania tematami prac dyplomowych</h1>
 
+<div class="hero-box">
+    <div class="hero-content">
+        <div>
+            <h2>Nowoczesny system zarządzania tematami prac dyplomowych</h2>
+            <p>
+                jakis <code>&lt;p&gt;</code> tam tekst o tym, ze to jest fajne i takie tam, zeby strona glowna nie byla pusta. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor
+            </p>
+
+            
+            <div class="cta-buttons">
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+                    var rolePaths = new Dictionary<string, string>
+                    {
+                        { "admin", "/AdminDashboard" },
+                        { "dziekan", "/DziekanDashboard" },
+                        { "kierownik", "/KierownikDashboard" },
+                        { "promotor", "/PromotorDashboard" },
+                        { "student", "/StudentDashboard" }
+                    };
+
+                    var dashboardUrl = rolePaths.FirstOrDefault(r => User.IsInRole(r.Key)).Value ?? "/";
+                    <a href="@dashboardUrl" class="btn btn-primary btn-lg">Przejdź do Dashboardu</a>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="btn btn-primary btn-lg">Zaloguj się</a>
+                    <a href="/Account/Register" class="btn btn-success btn-lg">Zarejestruj się</a>
+                }
+            </div>
+        </div>
+
+        <div class="hero-icon-box">
+            <div class="hero-icon">🎓</div>
+            <p>szpont</p>
+        </div>
+    </div>
+</div>
+
+<div class="section-box">
+    <h3>O systemie</h3>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h4>Przegląd tematów</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">👨‍🏫</div>
+            <h4>Współpraca z promotorem</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h4>Szybki proces</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section-box">
+    <h3>Jak to działa?</h3>
+    <div class="steps-grid">
+        <div class="step-card">
+            <span class="step-number">1</span>
+            <h4>Wybierz temat</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">2</span>
+            <h4>Złóż zgłoszenie</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+
+        <div class="step-card">
+            <span class="step-number">3</span>
+            <h4>Śledź postęp</h4>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section-box">
+    <h3>Statystyki publiczne</h3>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">@ViewBag.TopicsCount</div>
+            <div class="stat-label">Dostępnych tematów</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@ViewBag.PromotorsCount</div>
+            <div class="stat-label">Promotorów</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-box,
+.section-box {
+    padding: 25px;
+    margin-bottom: 35px;
+    background: rgba(50, 50, 50, 0.9);
+    border: 1px solid #777;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    align-items: center;
+}
+
+.hero-box h2,
+.section-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.hero-box p,
+.section-box p {
+    color: #ddd;
+}
+
+.hero-icon-box,
+.feature-card,
+.step-card,
+.stat-card {
+    background-color: rgba(40, 40, 40, 0.95);
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.hero-icon-box:hover,
+.feature-card:hover,
+.step-card:hover,
+.stat-card:hover {
+    transform: translateY(-4px);
+    background-color: rgba(70, 70, 70, 0.95);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.hero-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.feature-grid,
+.steps-grid,
+.stats-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.feature-grid,
+.steps-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.step-number {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.stat-label {
+    color: #ccc;
+    margin-top: 5px;
+}
+
+@@media (max-width: 768px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+    }
+}
+</style>

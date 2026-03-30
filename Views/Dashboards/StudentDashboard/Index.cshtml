@@ -2,6 +2,27 @@
     ViewData["Title"] = "Panel studenta";
 }
 
-<h1>Panel studenta</h1>
-<p>Dostęp posiada wyłącznie rola <strong>student</strong>.</p>
+<div class="dashboard-page">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Panel studenta</h1>
+        <p class="dashboard-subtitle">Twoja przestrzeń do przeglądania i śledzenia tematów.</p>
+    </header>
+
+    <div class="dashboard-stats-grid">
+        <div class="dashboard-stat-card">
+            <h3 class="dashboard-stat-label">Status</h3>
+            <h4 class="dashboard-stat-value">Aktywny dostęp</h4>
+        </div>
+        <div class="dashboard-stat-card">
+            <h3 class="dashboard-stat-label">Tematy</h3>
+            <h4 class="dashboard-stat-value">Sprawdź dostępne propozycje</h4>
+        </div>
+    </div>
+
+    <div class="dashboard-panel mb-0">
+        <h2 class="dashboard-panel-title">Szybki start</h2>
+        <p class="dashboard-empty mb-3">Przejdź do listy tematów, aby zobaczyć szczegóły i statusy akceptacji.</p>
+        <a asp-controller="Topics" asp-action="Index" class="btn btn-primary dashboard-btn">Przejdź do tematów</a>
+    </div>
+</div>
 

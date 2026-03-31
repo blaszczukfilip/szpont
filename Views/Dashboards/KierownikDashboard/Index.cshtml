@@ -5,11 +5,14 @@
     ViewData["Title"] = "Panel Kierownika";
 }
 
-<h2>Panel Kierownika – tematy oczekujące na akceptację</h2>
-<p>Dostęp posiada wyłącznie rola <strong>kierownik</strong>.</p>
+<div class="dashboard-page">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Panel kierownika</h1>
+        <p class="dashboard-subtitle">Lista tematów oczekujących na akceptację kierownika.</p>
+    </header>
 
-<div class="box">
-    <table class="table" style="color: #fff;">
+    <div class="dashboard-panel">
+    <table class="table dashboard-table">
         <thead>
             <tr>
                 <th>TYTUŁ</th>
@@ -21,7 +24,7 @@
                         var nextSort = isAsc ? "date_desc" : "date_asc";
                         var arrow = isAsc ? "↑" : "↓";
                     }
-                    <a asp-action="Index" asp-route-sortOrder="@nextSort" style="color: #fff; text-decoration: none;">
+                    <a asp-action="Index" asp-route-sortOrder="@nextSort" class="dashboard-sort-link">
                         Data wysłania @arrow
                     </a>
                 </th>
@@ -61,7 +64,7 @@
                             <a asp-controller="Topics"
                                asp-action="Details"
                                asp-route-id="@item.Id"
-                               class="btn btn-primary btn-sm">
+                               class="btn btn-primary btn-sm dashboard-btn">
                                 Szczegóły
                             </a>
                         </td>
@@ -70,27 +73,7 @@
             }
         </tbody>
     </table>
+    </div>
 </div>
 
-<style>
-    .box {
-        margin-top: 15px;
-        padding: 15px;
-        border-radius: 8px;
-        background-color: rgba(40, 40, 40, 0.95);
-        color: #fff;
-        border: 1px solid #555;
-    }
-
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .table td, .table th {
-            padding: 10px;
-            border-bottom: 1px solid #444;
-            text-align: left;
-        }
-</style>
 

@@ -4,65 +4,73 @@
     ViewData["Title"] = "Panel studenta";
 }
 
-<h1>Panel studenta</h1>
+<div class="dashboard-page">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Panel studenta</h1>
+        <p class="dashboard-subtitle">Twoja przestrzeń do przeglądania i śledzenia tematów.</p>
+    </header>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
-<div class="mt-4">
-    <h3>Moja rezerwacja</h3>
-
-    @if (Model != null)
+    @if (TempData["SuccessMessage"] != null)
     {
-        <div class="box">
-            <p><strong>Tytuł:</strong> @Model.Title</p>
-            <p><strong>Typ:</strong> @Model.Type</p>
-            <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
-            @if (Model.Promotor != null)
-            {
-                <p><strong>Promotor:</strong> @Model.Promotor.FirstName @Model.Promotor.LastName</p>
-            }
-            @if (Model.ReservationDate.HasValue)
-            {
-                <p><strong>Data rezerwacji:</strong> @Model.ReservationDate.Value.ToString("dd.MM.yyyy HH:mm")</p>
-            }
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
 
-            <div class="mt-3 d-flex gap-2">
-                <a asp-controller="Topics" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
-                    Szczegóły
-                </a>
-                <form asp-controller="Topics" asp-action="CancelReservation" method="post" style="display:inline;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger">
-                        Anuluj rezerwację
-                    </button>
-                </form>
+    <div class="dashboard-stats-grid">
+        <div class="dashboard-stat-card">
+            <h3 class="dashboard-stat-label">Status</h3>
+            <h4 class="dashboard-stat-value">Aktywny dostęp</h4>
+        </div>
+        <div class="dashboard-stat-card">
+            <h3 class="dashboard-stat-label">Tematy</h3>
+            <h4 class="dashboard-stat-value">Sprawdź dostępne propozycje</h4>
+        </div>
+    </div>
+
+    <div class="dashboard-panel">
+        <h2 class="dashboard-panel-title">Moja rezerwacja</h2>
+        @if (Model != null)
+        {
+            <div class="reservation-details">
+                <p><strong>Tytuł:</strong> @Model.Title</p>
+                <p><strong>Typ:</strong> @Model.Type</p>
+                <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
+                @if (Model.Promotor != null)
+                {
+                    <p><strong>Promotor:</strong> @Model.Promotor.FirstName @Model.Promotor.LastName</p>
+                }
+                @if (Model.ReservationDate.HasValue)
+                {
+                    <p><strong>Data rezerwacji:</strong> @Model.ReservationDate.Value.ToString("dd.MM.yyyy HH:mm")</p>
+                }
+
+                <div class="mt-3 d-flex gap-2">
+                    <a asp-controller="Topics" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary dashboard-btn">
+                        Szczegóły
+                    </a>
+                    <form asp-controller="Topics" asp-action="CancelReservation" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger">
+                            Anuluj rezerwację
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-info">
-            Nie masz jeszcze zarezerwowanego tematu.
-            <a asp-controller="Topics" asp-action="Index">Przeglądaj dostępne tematy</a>
-        </div>
-    }
-</div>
+        }
+        else
+        {
+            <p class="dashboard-empty">Nie masz jeszcze zarezerwowanego tematu.</p>
+            <a asp-controller="Topics" asp-action="Index" class="btn btn-primary dashboard-btn">Przeglądaj dostępne tematy</a>
+        }
+    </div>
 
-<style>
-    .box {
-        margin-top: 15px;
-        padding: 15px;
-        border-radius: 8px;
-        background-color: rgba(40, 40, 40, 0.95);
-        color: #fff;
-        border: 1px solid #555;
-    }
-</style>
+    <div class="dashboard-panel mb-0">
+        <h2 class="dashboard-panel-title">Szybki start</h2>
+        <p class="dashboard-empty mb-3">Przejdź do listy tematów, aby zobaczyć szczegóły i statusy akceptacji.</p>
+        <a asp-controller="Topics" asp-action="Index" class="btn btn-primary dashboard-btn">Przejdź do tematów</a>
+    </div>
+</div>

@@ -25,6 +25,11 @@ namespace szpont.Controllers
                 .Include(t => t.Promotor)
                 .FirstOrDefaultAsync(t => t.StudentId == currentUserId);
 
+            var availableTopics = await _context.Topics
+                .CountAsync(t => t.Status == TopicStatus.Approved && t.StudentId == null);
+            
+            ViewBag.AvailableTopicsCount = availableTopics;
+
             return View("~/Views/Dashboards/StudentDashboard/Index.cshtml", myReservation);
         }
     }

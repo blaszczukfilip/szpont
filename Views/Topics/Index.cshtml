@@ -52,7 +52,12 @@
         <p class="d-flex gap-2">
             <button type="submit" class="btn btn-primary btn-lg">Filtruj</button>
             <button type="button" class="btn btn-danger btn-lg" onclick="window.location='/Topics/Index'">Wyczyść</button>
-            <button type="button" class="btn btn-success btn-lg" onclick="window.location='/Topics/Create'">Stwórz</button>
+             @if (User?.Identity?.IsAuthenticated == true &&
+                (User.IsInRole("promotor") || User.IsInRole("admin")))
+                {
+                <button type="button" class="btn btn-success btn-lg" onclick="window.location='/Topics/Create'">Stwórz</button>
+                }
+
         </p>
     </form>
 </div>

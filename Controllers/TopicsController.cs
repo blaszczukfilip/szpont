@@ -93,6 +93,7 @@ namespace szpont.Controllers
                 .Include(t => t.Promotor)
                 .Include(t => t.Kierownik)
                 .Include(t => t.Dziekan)
+                .Include(t => t.Student)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (topic == null)
             {
@@ -182,6 +183,74 @@ namespace szpont.Controllers
             TempData["SuccessMessage"] = "Temat został wysłany do akceptacji przez Kierownika.";
 
             return RedirectToAction(nameof(Details), new { id = topic.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "student")]
+        public async Task<IActionResult> Reserve(int id)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var existingReservation = await _context.Topics
+                .FirstOrDefaultAsync(t => t.StudentId == currentUserId);
+
+            if (existingReservation != null)
+            {
+                TempData["ErrorMessage"] = "Masz już zarezerwowany temat. Anuluj obecną rezerwację, aby zarezerwować inny.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var topic = await _context.Topics.FindAsync(id);
+
+            if (topic == null)
+                return NotFound();
+
+            if (topic.Status != TopicStatus.Approved)
+            {
+                TempData["ErrorMessage"] = "Można rezerwować tylko zatwierdzone tematy.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (topic.StudentId != null)
+            {
+                TempData["ErrorMessage"] = "Ten temat jest już zarezerwowany przez innego studenta.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            topic.StudentId = currentUserId;
+            topic.ReservationDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Temat został zarezerwowany pomyślnie.";
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "student")]
+        public async Task<IActionResult> CancelReservation(int id)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var topic = await _context.Topics.FindAsync(id);
+
+            if (topic == null)
+                return NotFound();
+
+            if (topic.StudentId != currentUserId)
+            {
+                TempData["ErrorMessage"] = "Nie możesz anulować rezerwacji, która nie należy do Ciebie.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            topic.StudentId = null;
+            topic.ReservationDate = null;
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Rezerwacja została anulowana.";
+
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }

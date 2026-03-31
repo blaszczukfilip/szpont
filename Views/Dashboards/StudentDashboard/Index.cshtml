@@ -1,3 +1,5 @@
+@model szpont.Models.Topic
+
 @{
     ViewData["Title"] = "Panel studenta";
 }
@@ -19,6 +21,44 @@
         </div>
     </div>
 
+    <div class="dashboard-panel">
+        <h2 class="dashboard-panel-title">Moja rezerwacja</h2>
+        @if (Model != null)
+        {
+            <div class="reservation-details">
+                <p><strong>Tytuł:</strong> @Model.Title</p>
+                <p><strong>Typ:</strong> @Model.Type</p>
+                <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
+                @if (Model.Promotor != null)
+                {
+                    <p><strong>Promotor:</strong> @Model.Promotor.FirstName @Model.Promotor.LastName</p>
+                }
+                @if (Model.ReservationDate.HasValue)
+                {
+                    <p><strong>Data rezerwacji:</strong> @Model.ReservationDate.Value.ToString("dd.MM.yyyy HH:mm")</p>
+                }
+
+                <div class="mt-3 d-flex gap-2">
+                    <a asp-controller="Topics" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary dashboard-btn">
+                        Szczegóły
+                    </a>
+                    <form asp-controller="Topics" asp-action="CancelReservation" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger">
+                            Anuluj rezerwację
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="dashboard-empty">Nie masz jeszcze zarezerwowanego tematu.</p>
+            <a asp-controller="Topics" asp-action="Index" class="btn btn-primary dashboard-btn">Przeglądaj dostępne tematy</a>
+        }
+    </div>
+
     <div class="dashboard-panel mb-0">
         <h2 class="dashboard-panel-title">Szybki start</h2>
         <p class="dashboard-empty mb-3">Przejdź do listy tematów, aby zobaczyć szczegóły i statusy akceptacji.</p>
@@ -26,3 +66,109 @@
     </div>
 </div>
 
+@if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container" id="toastContainer">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="toast-notification success">
+                <span>@TempData["SuccessMessage"]</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="toast-notification error">
+                <span>@TempData["ErrorMessage"]</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+        }
+    </div>
+
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-notification {
+            min-width: 300px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toast-notification.success {
+            background-color: #198754;
+            color: white;
+            border: 1px solid #157347;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #b02a37;
+        }
+
+        .toast-notification.fade-out {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 15px;
+            opacity: 0.8;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.toast-notification');
+            toasts.forEach(function(toast) {
+                setTimeout(function() {
+                    toast.classList.add('fade-out');
+                    setTimeout(function() {
+                        toast.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+    </script>
+}

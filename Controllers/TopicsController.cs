@@ -147,18 +147,21 @@ namespace szpont.Controllers
         {
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
             model.PromotorId = userId;
-
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
+            model.Status = TopicStatus.Draft;
             model.CreatedDate = DateTime.Now;
-            _context.Topics.Add(model);
-            await _context.SaveChangesAsync();
+            ModelState.Remove("PromotorId");
+            ModelState.Remove("Status");
+            ModelState.Remove("Promotor");
 
-            TempData["SuccessMessage"] = "Nowy temat został dodany.";
-            return RedirectToAction(nameof(Index));
+            if (ModelState.IsValid)
+            {
+                _context.Topics.Add(model);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Nowy temat został utworzony jako szkic.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
         }
 
         [HttpPost]

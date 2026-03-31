@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using szpont.Data;
 using szpont.Models;
 
 namespace szpont.Controllers
@@ -10,15 +12,24 @@ namespace szpont.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _logger = logger;
             _userManager = userManager;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var topicsCount = await _context.Topics.CountAsync();
+            var promotors = await _userManager.GetUsersInRoleAsync("promotor");
+            var promotorsCount = promotors.Count;
+
+            ViewBag.TopicsCount = topicsCount;
+            ViewBag.PromotorsCount = promotorsCount;
+
             return View();
         }
 

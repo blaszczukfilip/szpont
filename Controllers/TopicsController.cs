@@ -12,6 +12,7 @@ namespace szpont.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
+        private const int MaxReservableTopicsPerPromotor = 10;
 
         public TopicsController(ApplicationDbContext context, INotificationService notificationService)
         {
@@ -105,6 +106,15 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("promotor") && !string.IsNullOrEmpty(currentUserId))
+            {
+                var reservableTopicsCount = await GetReservableTopicsCountForPromotorAsync(currentUserId);
+                ViewBag.ReservableTopicsCount = reservableTopicsCount;
+                ViewBag.MaxReservableTopics = MaxReservableTopicsPerPromotor;
+            }
+
             return View(topic);
         }
 
@@ -182,6 +192,13 @@ namespace szpont.Controllers
             if (topic.Status != TopicStatus.Draft)
             {
                 TempData["ErrorMessage"] = "Tylko szkice mogą być wysłane do akceptacji.";
+                return RedirectToAction(nameof(Details), new { id = topic.Id });
+            }
+
+            var reservableTopicsCount = await GetReservableTopicsCountForPromotorAsync(currentUserId!);
+            if (reservableTopicsCount >= MaxReservableTopicsPerPromotor)
+            {
+                TempData["ErrorMessage"] = $"Osiągnięto limit {MaxReservableTopicsPerPromotor} tematów dostępnych do rezerwacji. Nie możesz wysłać kolejnego tematu do akceptacji.";
                 return RedirectToAction(nameof(Details), new { id = topic.Id });
             }
 
@@ -269,6 +286,14 @@ namespace szpont.Controllers
             TempData["SuccessMessage"] = "Rezerwacja została anulowana.";
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        private Task<int> GetReservableTopicsCountForPromotorAsync(string promotorId)
+        {
+            return _context.Topics.CountAsync(t =>
+                t.PromotorId == promotorId &&
+                t.Status == TopicStatus.Approved &&
+                t.StudentId == null);
         }
     }
 }

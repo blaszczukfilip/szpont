@@ -11,6 +11,8 @@ namespace szpont.Controllers
     public class PromotorDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private const int MaxReservableTopicsPerPromotor = 10;
+
         public PromotorDashboardController(ApplicationDbContext context)
         {
             _context = context;
@@ -26,6 +28,8 @@ namespace szpont.Controllers
             ViewBag.CountWaiting = myTopics.Count(t => t.Status == TopicStatus.WaitingForKierownik || t.Status == TopicStatus.WaitingForDziekan);
             ViewBag.CountApproved = myTopics.Count(t => t.Status == TopicStatus.Approved);
             ViewBag.CountRejected = myTopics.Count(t => t.Status == TopicStatus.Rejected);
+            ViewBag.ReservableTopicsCount = myTopics.Count(t => t.Status == TopicStatus.Approved && t.StudentId == null);
+            ViewBag.MaxReservableTopics = MaxReservableTopicsPerPromotor;
 
             return View("~/Views/Dashboards/PromotorDashboard/Index.cshtml", myTopics);
         }

@@ -40,6 +40,7 @@ namespace szpont
             builder.Services.AddRazorPages();
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
             builder.Services.AddTransient<szpont.Services.IEmailSender, SmtpEmailSender>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
             var app = builder.Build();
 

@@ -11,6 +11,7 @@ namespace szpont.Controllers
     public class DziekanDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private const int MaxReservableTopicsPerPromotor = 10;
 
         public DziekanDashboardController(ApplicationDbContext context)
         {
@@ -56,6 +57,17 @@ namespace szpont.Controllers
             if (topic.Status != TopicStatus.WaitingForDziekan)
             {
                 TempData["ErrorMessage"] = "Temat nie jest w statusie oczekującym na decyzję Dziekana.";
+                return RedirectToAction("Details", "Topics", new { id = topic.Id });
+            }
+
+            var reservableTopicsCount = await _context.Topics.CountAsync(t =>
+                t.PromotorId == topic.PromotorId &&
+                t.Status == TopicStatus.Approved &&
+                t.StudentId == null);
+
+            if (reservableTopicsCount >= MaxReservableTopicsPerPromotor)
+            {
+                TempData["ErrorMessage"] = $"Promotor osiągnął limit {MaxReservableTopicsPerPromotor} tematów dostępnych do rezerwacji. Nie można zatwierdzić tego tematu.";
                 return RedirectToAction("Details", "Topics", new { id = topic.Id });
             }
 

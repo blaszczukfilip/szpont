@@ -11,6 +11,8 @@ namespace szpont.Controllers
     public class PromotorDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private const int MaxReservableTopicsPerPromotor = 10;
+
         public PromotorDashboardController(ApplicationDbContext context)
         {
             _context = context;
@@ -26,6 +28,8 @@ namespace szpont.Controllers
             ViewBag.CountWaiting = myTopics.Count(t => t.Status == TopicStatus.WaitingForKierownik || t.Status == TopicStatus.WaitingForDziekan);
             ViewBag.CountApproved = myTopics.Count(t => t.Status == TopicStatus.Approved);
             ViewBag.CountRejected = myTopics.Count(t => t.Status == TopicStatus.Rejected);
+            ViewBag.ReservableTopicsCount = myTopics.Count(t => t.Status == TopicStatus.Approved && t.StudentId == null);
+            ViewBag.MaxReservableTopics = MaxReservableTopicsPerPromotor;
             ViewBag.PendingReservationsCount = myTopics.Count(t =>
                 t.StudentId != null && t.ReservationStatus == ReservationStatus.Pending);
 
@@ -57,13 +61,13 @@ namespace szpont.Controllers
                 return Forbid();
             if (topic.ReservationStatus != ReservationStatus.Pending)
             {
-                TempData["ErrorMessage"] = "Ta rezerwacja nie oczekuje na akceptację.";
+                TempData["ErrorMessage"] = "Ta rezerwacja nie oczekuje na akceptacj�.";
                 return RedirectToAction("Details", "Topics", new { id = topic.Id });
             }
 
             topic.ReservationStatus = ReservationStatus.Accepted;
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Rezerwacja została zaakceptowana. Student jest przypisany do tematu.";
+            TempData["SuccessMessage"] = "Rezerwacja zosta�a zaakceptowana. Student jest przypisany do tematu.";
             return RedirectToAction("Details", "Topics", new { id = topic.Id });
         }
 
@@ -80,7 +84,7 @@ namespace szpont.Controllers
                 return Forbid();
             if (topic.ReservationStatus != ReservationStatus.Pending)
             {
-                TempData["ErrorMessage"] = "Ta rezerwacja nie oczekuje na decyzję.";
+                TempData["ErrorMessage"] = "Ta rezerwacja nie oczekuje na decyzj�.";
                 return RedirectToAction("Details", "Topics", new { id = topic.Id });
             }
 
@@ -88,7 +92,7 @@ namespace szpont.Controllers
             topic.ReservationDate = null;
             topic.ReservationStatus = null;
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Rezerwacja została odrzucona. Temat jest ponownie dostępny dla studentów.";
+            TempData["SuccessMessage"] = "Rezerwacja zosta�a odrzucona. Temat jest ponownie dost�pny dla student�w.";
             return RedirectToAction("Details", "Topics", new { id = topic.Id });
         }
     }

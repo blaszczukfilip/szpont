@@ -4,16 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using szpont.Data;
 using szpont.Models;
+using szpont.Services;
 
 namespace szpont.Controllers
 {
     public class TopicsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
+        private const int MaxReservableTopicsPerPromotor = 10;
 
-        public TopicsController(ApplicationDbContext context)
+        public TopicsController(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public IActionResult Index(string searchTerm, string typeFilter, string keywordFilter)
@@ -102,6 +106,15 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("promotor") && !string.IsNullOrEmpty(currentUserId))
+            {
+                var reservableTopicsCount = await GetReservableTopicsCountForPromotorAsync(currentUserId);
+                ViewBag.ReservableTopicsCount = reservableTopicsCount;
+                ViewBag.MaxReservableTopics = MaxReservableTopicsPerPromotor;
+            }
+
             return View(topic);
         }
 
@@ -205,6 +218,13 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id = topic.Id });
             }
 
+            var reservableTopicsCount = await GetReservableTopicsCountForPromotorAsync(currentUserId!);
+            if (reservableTopicsCount >= MaxReservableTopicsPerPromotor)
+            {
+                TempData["ErrorMessage"] = $"Osiągnięto limit {MaxReservableTopicsPerPromotor} tematów dostępnych do rezerwacji. Nie możesz wysłać kolejnego tematu do akceptacji.";
+                return RedirectToAction(nameof(Details), new { id = topic.Id });
+            }
+
             topic.Status = TopicStatus.WaitingForKierownik;
             topic.SubmittedDate = DateTime.Now;
 
@@ -229,7 +249,9 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var topic = await _context.Topics.FindAsync(id);
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (topic == null)
                 return NotFound();
@@ -251,7 +273,14 @@ namespace szpont.Controllers
             topic.ReservationStatus = ReservationStatus.Pending;
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Wysłano prośbę o rezerwację. Oczekuje na akceptację przez promotora.";
+
+            var student = await _context.Users.FindAsync(currentUserId);
+            if (student != null && topic.Promotor != null)
+            {
+                await _notificationService.CreateTopicReservedNotificationAsync(topic, student);
+            }
+
+            TempData["SuccessMessage"] = "Temat został zarezerwowany pomyślnie.";
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -288,6 +317,14 @@ namespace szpont.Controllers
             TempData["SuccessMessage"] = "Rezerwacja została anulowana.";
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        private Task<int> GetReservableTopicsCountForPromotorAsync(string promotorId)
+        {
+            return _context.Topics.CountAsync(t =>
+                t.PromotorId == promotorId &&
+                t.Status == TopicStatus.Approved &&
+                t.StudentId == null);
         }
     }
 }

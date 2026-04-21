@@ -151,6 +151,12 @@
     @if (Model.Status == TopicStatus.Draft && Model.PromotorId == User.FindFirstValue(ClaimTypes.NameIdentifier))
     {
         <div class="mt-3">
+            @if (ViewBag.ReservableTopicsCount != null && ViewBag.MaxReservableTopics != null)
+            {
+                <div class="alert alert-info mb-3">
+                    Tematy dostępne do rezerwacji: @ViewBag.ReservableTopicsCount / @ViewBag.MaxReservableTopics
+                </div>
+            }
             <form asp-action="SubmitForApproval" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />

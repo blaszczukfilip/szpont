@@ -30,6 +30,17 @@
     </div>
 
     <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="PromotorId" />
+    <input type="hidden" asp-for="Status" />
+    <input type="hidden" asp-for="CreatedDate" />
+    <input type="hidden" asp-for="KierownikId" />
+    <input type="hidden" asp-for="DziekanId" />
+    <input type="hidden" asp-for="StudentId" />
+    <input type="hidden" asp-for="ReservationDate" />
+    <input type="hidden" asp-for="ReservationStatus" />
+    <input type="hidden" asp-for="SubmittedDate" />
+    <input type="hidden" asp-for="ApprovedDate" />
+    <input type="hidden" asp-for="RejectionReason" />
 
     <div style="margin-top: 20px;">
         <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
@@ -87,25 +98,17 @@
     }
 
     <script>
-        const editForm = document.getElementById('editForm');
-        const successPopup = document.getElementById('successPopup');
-        const closePopup = document.getElementById('closePopup');
+        $(document).ready(function () {
+            var successMessage = '@(TempData["SuccessMessage"] ?? "")';
 
-        function isFormValid() {
-            return $(editForm).valid();
-        }
-
-        editForm.addEventListener('submit', function(e){
-            e.preventDefault();
-
-            if(isFormValid()){
-                successPopup.style.display = 'flex';
+            if (successMessage !== "") {
+                $('#successPopup').css('display', 'flex');
             }
-        });
 
-        closePopup.addEventListener('click', function(){
-            successPopup.style.display = 'none';
-            editForm.submit();
+            $('#closePopup').on('click', function () {
+                $('#successPopup').hide();
+                window.location.href = '@Url.Action("Index")';
+            });
         });
     </script>
 }

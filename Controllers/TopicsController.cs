@@ -120,16 +120,39 @@ namespace szpont.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "promotor, admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords")] Topic topic)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords,CreatedDate,Status,PromotorId,KierownikId,DziekanId,StudentId,ReservationDate,ReservationStatus,RejectionReason,SubmittedDate,ApprovedDate")] Topic topic)
         {
             if (id != topic.Id)
+            {
                 return NotFound();
+            }
+            ModelState.Remove("Promotor");
+            ModelState.Remove("Kierownik");
+            ModelState.Remove("Dziekan");
+            ModelState.Remove("Student");
 
             if (ModelState.IsValid)
             {
-                _context.Update(topic); 
-                await _context.SaveChangesAsync(); 
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Update(topic);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Zmiany zostały pomyślnie zapisane.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Topics.Any(e => e.Id == topic.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             return View(topic);
         }

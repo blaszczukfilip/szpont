@@ -4,16 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using szpont.Data;
 using szpont.Models;
+using szpont.Services;
 
 namespace szpont.Controllers
 {
     public class TopicsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public TopicsController(ApplicationDbContext context)
+        public TopicsController(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public IActionResult Index(string searchTerm, string typeFilter, string keywordFilter)
@@ -207,7 +210,9 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var topic = await _context.Topics.FindAsync(id);
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (topic == null)
                 return NotFound();
@@ -228,6 +233,13 @@ namespace szpont.Controllers
             topic.ReservationDate = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
+            var student = await _context.Users.FindAsync(currentUserId);
+            if (student != null && topic.Promotor != null)
+            {
+                await _notificationService.CreateTopicReservedNotificationAsync(topic, student);
+            }
+
             TempData["SuccessMessage"] = "Temat został zarezerwowany pomyślnie.";
 
             return RedirectToAction(nameof(Details), new { id });

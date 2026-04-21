@@ -73,6 +73,24 @@
             a:hover {
                 color: #a9d3ff;
             }
+
+        .notification-link {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -89,7 +107,15 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Topics" asp-action="Index">Tematy</a>
                         </li>
-                        <!--przycisk "Użytkownicy" widoczny tylko przez administratora-->
+                        @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("promotor"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link notification-link" asp-controller="Notifications" asp-action="Index">
+                                    Powiadomienia
+                                    <span id="notification-badge" class="notification-badge" style="display: none;"></span>
+                                </a>
+                            </li>
+                        }
                         @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("admin"))
                         {
                             <li class="nav-item">
@@ -118,6 +144,23 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("promotor"))
+    {
+        <script>
+            (function() {
+                fetch('/Notifications/GetUnreadCount')
+                    .then(response => response.json())
+                    .then(data => {
+                        var badge = document.getElementById('notification-badge');
+                        if (badge && data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'inline-block';
+                        }
+                    })
+                    .catch(() => {});
+            })();
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

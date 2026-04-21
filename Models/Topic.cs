@@ -53,6 +53,8 @@ namespace szpont.Models
 
         public DateTime? ReservationDate { get; set; }
 
+        public ReservationStatus? ReservationStatus { get; set; }
+
         [ForeignKey("StudentId")]
         public virtual ApplicationUser? Student { get; set; }
     }

@@ -198,12 +198,11 @@ namespace szpont.Controllers
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var existingReservation = await _context.Topics
-                .FirstOrDefaultAsync(t => t.StudentId == currentUserId);
+            var hasActiveTopic = await _context.Topics.AnyAsync(t => t.StudentId == currentUserId);
 
-            if (existingReservation != null)
+            if (hasActiveTopic)
             {
-                TempData["ErrorMessage"] = "Masz już zarezerwowany temat. Anuluj obecną rezerwację, aby zarezerwować inny.";
+                TempData["ErrorMessage"] = "Masz już zarezerwowany lub przypisany temat. Anuluj oczekującą rezerwację, aby wybrać inny.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
@@ -226,9 +225,10 @@ namespace szpont.Controllers
 
             topic.StudentId = currentUserId;
             topic.ReservationDate = DateTime.Now;
+            topic.ReservationStatus = ReservationStatus.Pending;
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Temat został zarezerwowany pomyślnie.";
+            TempData["SuccessMessage"] = "Wysłano prośbę o rezerwację. Oczekuje na akceptację przez promotora.";
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -250,8 +250,16 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var effective = topic.ReservationStatus ?? ReservationStatus.Accepted;
+            if (effective != ReservationStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "Możesz anulować tylko rezerwację oczekującą na promotora. Po akceptacji skontaktuj się z promotorem.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             topic.StudentId = null;
             topic.ReservationDate = null;
+            topic.ReservationStatus = null;
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Rezerwacja została anulowana.";

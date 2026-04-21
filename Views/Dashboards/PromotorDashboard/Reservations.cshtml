@@ -1,0 +1,68 @@
+@using szpont.Models
+@model IReadOnlyList<szpont.Models.Topic>
+
+@{
+    ViewData["Title"] = "Rezerwacje studentów";
+}
+
+<div class="dashboard-page">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Rezerwacje do akceptacji</h1>
+        <p class="dashboard-subtitle">Student zarezerwował temat i oczekuje na Twoją decyzję.</p>
+        <p class="mt-2"><a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Panel promotora</a></p>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="dashboard-panel">
+        @if (Model.Count == 0)
+        {
+            <p class="dashboard-empty">Brak oczekujących rezerwacji.</p>
+        }
+        else
+        {
+            <table class="table dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Temat</th>
+                        <th>Student</th>
+                        <th>Data prośby</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td>@t.Title</td>
+                            <td>@(t.Student != null ? $"{t.Student.FirstName} {t.Student.LastName}" : "—")</td>
+                            <td>@(t.ReservationDate?.ToString("dd.MM.yyyy HH:mm") ?? "—")</td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <form asp-action="AcceptReservation" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <button type="submit" class="btn btn-success btn-sm">Zaakceptuj</button>
+                                    </form>
+                                    <form asp-action="RejectReservation" method="post" class="d-inline" onsubmit="return confirm('Odrzucić rezerwację? Temat znów będzie wolny.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Odrzuć</button>
+                                    </form>
+                                    <a asp-controller="Topics" asp-action="Details" asp-route-id="@t.Id" class="btn btn-outline-primary btn-sm">Szczegóły tematu</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

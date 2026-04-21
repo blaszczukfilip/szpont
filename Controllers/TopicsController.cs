@@ -133,16 +133,39 @@ namespace szpont.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "promotor, admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords")] Topic topic)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords,CreatedDate,Status,PromotorId,KierownikId,DziekanId,StudentId,ReservationDate,ReservationStatus,RejectionReason,SubmittedDate,ApprovedDate")] Topic topic)
         {
             if (id != topic.Id)
+            {
                 return NotFound();
+            }
+            ModelState.Remove("Promotor");
+            ModelState.Remove("Kierownik");
+            ModelState.Remove("Dziekan");
+            ModelState.Remove("Student");
 
             if (ModelState.IsValid)
             {
-                _context.Update(topic); 
-                await _context.SaveChangesAsync(); 
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Update(topic);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Zmiany zostały pomyślnie zapisane.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Topics.Any(e => e.Id == topic.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             return View(topic);
         }
@@ -218,12 +241,11 @@ namespace szpont.Controllers
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var existingReservation = await _context.Topics
-                .FirstOrDefaultAsync(t => t.StudentId == currentUserId);
+            var hasActiveTopic = await _context.Topics.AnyAsync(t => t.StudentId == currentUserId);
 
-            if (existingReservation != null)
+            if (hasActiveTopic)
             {
-                TempData["ErrorMessage"] = "Masz już zarezerwowany temat. Anuluj obecną rezerwację, aby zarezerwować inny.";
+                TempData["ErrorMessage"] = "Masz już zarezerwowany lub przypisany temat. Anuluj oczekującą rezerwację, aby wybrać inny.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
@@ -248,6 +270,7 @@ namespace szpont.Controllers
 
             topic.StudentId = currentUserId;
             topic.ReservationDate = DateTime.Now;
+            topic.ReservationStatus = ReservationStatus.Pending;
 
             await _context.SaveChangesAsync();
 
@@ -279,8 +302,16 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var effective = topic.ReservationStatus ?? ReservationStatus.Accepted;
+            if (effective != ReservationStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "Możesz anulować tylko rezerwację oczekującą na promotora. Po akceptacji skontaktuj się z promotorem.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             topic.StudentId = null;
             topic.ReservationDate = null;
+            topic.ReservationStatus = null;
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Rezerwacja została anulowana.";

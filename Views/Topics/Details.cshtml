@@ -83,6 +83,20 @@
         }
     </div>
 
+    @if (User.IsInRole("student") || User.IsInRole("promotor"))
+    {
+        <div class="dropdown action-buttons" style="margin-top:10px;">
+            <button class="btn btn-outline-primary btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Eksportuj
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-action="ExportTxt" asp-route-id="@Model.Id">Eksport TXT</a></li>
+                <li><a class="dropdown-item" asp-action="ExportCsv" asp-route-id="@Model.Id">Eksport CSV</a></li>
+                <li><a class="dropdown-item" asp-action="ExportPdf" asp-route-id="@Model.Id">Eksport PDF</a></li>
+            </ul>
+        </div>
+    }
+
     @if (User.IsInRole("promotor") && Model.PromotorId == User.FindFirstValue(ClaimTypes.NameIdentifier)
         && Model.Status == TopicStatus.Approved && Model.StudentId != null && Model.ReservationStatus == ReservationStatus.Pending)
     {

@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.IO;
 using System.Security.Claims;
+using System.Text;
 using szpont.Data;
 using szpont.Models;
 using szpont.Services;
@@ -116,6 +121,62 @@ namespace szpont.Controllers
             }
 
             return View(topic);
+        }
+
+        [Authorize(Roles = "student,promotor")]
+        public async Task<IActionResult> ExportTxt(int id)
+        {
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (topic == null)
+            {
+                return NotFound();
+            }
+
+            var content = BuildTxtContent(topic);
+            var bytes = new UTF8Encoding(true).GetBytes(content);
+            var fileName = BuildExportFileName(topic, "txt");
+
+            return File(bytes, "text/plain; charset=utf-8", fileName);
+        }
+
+        [Authorize(Roles = "student,promotor")]
+        public async Task<IActionResult> ExportCsv(int id)
+        {
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (topic == null)
+            {
+                return NotFound();
+            }
+
+            var content = BuildCsvContent(topic);
+            var bytes = new UTF8Encoding(true).GetBytes(content);
+            var fileName = BuildExportFileName(topic, "csv");
+
+            return File(bytes, "text/csv; charset=utf-8", fileName);
+        }
+
+        [Authorize(Roles = "student,promotor")]
+        public async Task<IActionResult> ExportPdf(int id)
+        {
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (topic == null)
+            {
+                return NotFound();
+            }
+
+            var bytes = BuildPdfContent(topic);
+            var fileName = BuildExportFileName(topic, "pdf");
+
+            return File(bytes, "application/pdf", fileName);
         }
 
         [Authorize(Roles = "promotor, admin")]
@@ -325,6 +386,122 @@ namespace szpont.Controllers
                 t.PromotorId == promotorId &&
                 t.Status == TopicStatus.Approved &&
                 t.StudentId == null);
+        }
+
+        private static string BuildTxtContent(Topic topic)
+        {
+            var promotorFullName = GetPromotorFullName(topic);
+            var description = string.IsNullOrWhiteSpace(topic.Description) ? "Brak opisu" : topic.Description;
+            var keywords = string.IsNullOrWhiteSpace(topic.Keywords) ? "Brak" : topic.Keywords;
+
+            var builder = new StringBuilder();
+            builder.AppendLine($"Temat: {topic.Title}");
+            builder.AppendLine($"Opis: {description}");
+            builder.AppendLine($"Promotor: {promotorFullName}");
+            builder.AppendLine($"Słowa kluczowe: {keywords}");
+            builder.AppendLine($"Status: {topic.Status}");
+
+            return builder.ToString();
+        }
+
+        private static string BuildCsvContent(Topic topic)
+        {
+            var promotorFullName = GetPromotorFullName(topic);
+            var description = string.IsNullOrWhiteSpace(topic.Description) ? "Brak opisu" : topic.Description;
+            var keywords = string.IsNullOrWhiteSpace(topic.Keywords) ? "Brak" : topic.Keywords;
+
+            var builder = new StringBuilder();
+            builder.AppendLine("Temat,Opis,Promotor,Słowa kluczowe,Status");
+            builder.AppendLine(string.Join(",",
+                EscapeCsv(topic.Title),
+                EscapeCsv(description),
+                EscapeCsv(promotorFullName),
+                EscapeCsv(keywords),
+                EscapeCsv(topic.Status.ToString())));
+
+            return builder.ToString();
+        }
+
+        private static byte[] BuildPdfContent(Topic topic)
+        {
+            var promotorFullName = GetPromotorFullName(topic);
+            var description = string.IsNullOrWhiteSpace(topic.Description) ? "Brak opisu" : topic.Description;
+            var keywords = string.IsNullOrWhiteSpace(topic.Keywords) ? "Brak" : topic.Keywords;
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(30);
+                    page.DefaultTextStyle(style => style.FontFamily("Arial").FontSize(12));
+
+                    page.Header()
+                        .Text("Eksport tematu")
+                        .FontSize(18)
+                        .SemiBold();
+
+                    page.Content().Column(column =>
+                    {
+                        column.Spacing(8);
+                        column.Item().Text($"Temat: {topic.Title}");
+                        column.Item().Text($"Opis: {description}");
+                        column.Item().Text($"Promotor: {promotorFullName}");
+                        column.Item().Text($"Słowa kluczowe: {keywords}");
+                        column.Item().Text($"Status: {topic.Status}");
+                    });
+                });
+            }).GeneratePdf();
+        }
+
+        private static string GetPromotorFullName(Topic topic)
+        {
+            if (topic.Promotor == null)
+            {
+                return "Brak danych";
+            }
+
+            return $"{topic.Promotor.FirstName} {topic.Promotor.LastName}".Trim();
+        }
+
+        private static string BuildExportFileName(Topic topic, string extension)
+        {
+            var safeTitle = SanitizeFileName(topic.Title);
+            return $"{safeTitle}_{topic.Id}.{extension}";
+        }
+
+        private static string SanitizeFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return "temat";
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sanitized = new string(fileName
+                .Select(character => invalidChars.Contains(character) ? '_' : character)
+                .ToArray())
+                .Trim();
+
+            return string.IsNullOrWhiteSpace(sanitized) ? "temat" : sanitized;
+        }
+
+        private static string EscapeCsv(string value)
+        {
+            var normalized = value ?? string.Empty;
+            if (normalized.Contains('"'))
+            {
+                normalized = normalized.Replace("\"", "\"\"");
+            }
+
+            if (normalized.Contains(',') || normalized.Contains('"') || normalized.Contains('\n') || normalized.Contains('\r'))
+            {
+                normalized = $"\"{normalized}\"";
+            }
+
+            return normalized;
         }
     }
 }

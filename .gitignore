@@ -67,3 +67,4 @@ _ReSharper*/
 *.DotSettings.user
 
 stylecop.*
+/nul

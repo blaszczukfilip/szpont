@@ -6,8 +6,23 @@
 
 <div class="dashboard-page">
     <header class="dashboard-header">
-        <h1 class="dashboard-title">Panel administratora</h1>
-        <p class="dashboard-subtitle">Zbiorczy podgląd użytkowników, tematów oraz statystyk systemowych.</p>
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="dashboard-title">Panel administratora</h1>
+                <p class="dashboard-subtitle">Zbiorczy podgląd użytkowników, tematów oraz statystyk systemowych.</p>
+            </div>
+            <div class="export-buttons">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Eksportuj raport
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown">
+                        <li><a class="dropdown-item" asp-action="ExportSystemReportTxt">Pobierz jako TXT</a></li>
+                        <li><a class="dropdown-item" asp-action="ExportSystemReportCsv">Pobierz jako CSV</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </header>
 
     <div class="dashboard-stats-grid">

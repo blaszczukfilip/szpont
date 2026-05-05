@@ -352,7 +352,10 @@ namespace szpont.Controllers
         public async Task<IActionResult> CancelReservation(int id)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var topic = await _context.Topics.FindAsync(id);
+
+            var topic = await _context.Topics
+                .Include(t => t.Promotor)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (topic == null)
                 return NotFound();
@@ -370,12 +373,18 @@ namespace szpont.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var student = await _context.Users.FindAsync(currentUserId);
+            if (student != null && topic.Promotor != null)
+            {
+                await _notificationService.CreateReservationCancelledNotificationAsync(topic, student);
+            }
+
             topic.StudentId = null;
             topic.ReservationDate = null;
             topic.ReservationStatus = null;
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Rezerwacja została anulowana.";
+            TempData["SuccessMessage"] = "Rezerwacja została anulowana. Promotor otrzymał powiadomienie.";
 
             return RedirectToAction(nameof(Details), new { id });
         }

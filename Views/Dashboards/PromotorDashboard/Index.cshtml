@@ -28,6 +28,67 @@
             </div>
         }
     </header>
+    @{
+        var notifications = ViewBag.Notifications as List<szpont.Models.Notification>;
+        var unreadCount = (int)(ViewBag.UnreadNotificationsCount ?? 0);
+    }
+
+    <div class="notifications-section mb-5">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="dashboard-section-title mb-0">Powiadomienia</h2>
+            @if (unreadCount > 0)
+            {
+                <span class="badge bg-danger ms-2" style="border-radius: 4px;">@unreadCount nowe</span>
+            }
+        </div>
+
+        <div class="dashboard-panel p-0" style="background: transparent; border: none;">
+            @if (notifications != null && notifications.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var notif in notifications.Take(5))
+                    {
+                        <div class="dashboard-stat-card w-100 text-start p-3"
+                             style="border-left: 4px solid @(notif.Type == NotificationType.ReservationCancelled ? "#dc3545" : "#0d6efd");">
+
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-2" style="color: @(notif.Type == NotificationType.ReservationCancelled ? "#ff6b6b" : "#4dabf7"); font-weight: 600;">
+                                        @if (notif.Type == NotificationType.ReservationCancelled)
+                                        {
+                                            <span>⚠️ Anulowanie rezerwacji</span>
+                                        }
+                                        else
+                                        {
+                                            <span>ℹ️ Nowa rezerwacja</span>
+                                        }
+                                    </h6>
+                                    <p class="mb-2 text-white-50" style="font-size: 0.95rem;">@notif.Message</p>
+                                    <a asp-controller="Topics" asp-action="Details" asp-route-id="@notif.TopicId"
+                                       class="btn btn-outline-light btn-sm" style="border-color: rgba(255,255,255,0.2); font-size: 0.8rem;">
+                                        Szczegóły tematu
+                                    </a>
+                                </div>
+                                <small class="text-muted">@notif.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-3 text-end">
+                    <a asp-controller="Notifications" asp-action="Index" class="text-white-50 text-decoration-none" style="font-size: 0.85rem;">
+                        Zobacz wszystkie powiadomienia →
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="dashboard-stat-card p-4 text-center">
+                    <p class="mb-0 text-muted">Brak nowych powiadomień.</p>
+                </div>
+            }
+        </div>
+    </div>
 
     <div class="dashboard-stats-grid">
         <div class="dashboard-stat-card">

@@ -74,5 +74,21 @@ namespace szpont.Services
 
             await _context.SaveChangesAsync();
         }
+        public async Task CreateReservationCancelledNotificationAsync(Topic topic, ApplicationUser student)
+        {
+            var notification = new Notification
+            {
+                UserId = topic.PromotorId,
+                Type = NotificationType.ReservationCancelled,
+                Message = $"Student {student.FirstName} {student.LastName} ({student.StudentIndex}) anulował rezerwację tematu \"{topic.Title}\".",
+                TopicId = topic.Id,
+                StudentId = student.Id,
+                CreatedAt = DateTime.Now,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+        }
     }
 }

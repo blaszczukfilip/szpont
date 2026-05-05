@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using szpont.Data;
 using szpont.Models;
-using System.Security.Claims;
+using szpont.Services;
 
 namespace szpont.Controllers
 {
@@ -12,14 +13,18 @@ namespace szpont.Controllers
     {
         private readonly ApplicationDbContext _context;
         private const int MaxReservableTopicsPerPromotor = 10;
+        private readonly INotificationService _notificationService;
 
-        public PromotorDashboardController(ApplicationDbContext context)
+        public PromotorDashboardController(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewBag.Notifications = await _notificationService.GetUserNotificationsAsync(userId);
+            ViewBag.UnreadNotificationsCount = await _notificationService.GetUnreadCountAsync(userId);
             var myTopics = await _context.Topics
                 .Where(t => t.PromotorId == userId)
                 .ToListAsync();

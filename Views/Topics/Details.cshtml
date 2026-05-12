@@ -28,12 +28,33 @@
 
 <h2>Szczegóły tematu</h2>
 @{
-    <div class="box">
-        <p><strong>Tytuł:</strong> @Model.Title</p>
-        <p><strong>Typ:</strong> @Model.Type</p>
-        <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
-        <p><strong>Słowa kluczowe:</strong> @(string.IsNullOrEmpty(Model.Keywords) ? "Brak" : Model.Keywords)</p>
-        <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
+    <div class="row">
+        <div class="col-md-8">
+            <p><strong>Tytuł:</strong> @Model.Title</p>
+            <p><strong>Typ:</strong> @Model.Type</p>
+            <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
+            <p><strong>Słowa kluczowe:</strong> @(string.IsNullOrEmpty(Model.Keywords) ? "Brak" : Model.Keywords)</p>
+            <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
+        </div>
+
+        <div class="col-md-4 border-start border-secondary">
+            <h5 class="mb-3" style="color: #fff;">Promotor</h5>
+            @if (Model.Promotor != null)
+            {
+                <p class="mb-1">
+                    <i class="bi bi-person-badge me-2"></i>
+                    <strong>@Model.Promotor.FirstName @Model.Promotor.LastName</strong>
+                </p>
+                <p class="text-white-50 small">
+                    <i class="bi bi-envelope me-2"></i>
+                    <a href="mailto:@Model.Promotor.Email" class="text-white-50 text-decoration-none">@Model.Promotor.Email</a>
+                </p>
+            }
+            else
+            {
+                <p class="text-muted small">Brak danych o promotorze</p>
+            }
+        </div>
     </div>
     <div class="alert @(Model.Status == TopicStatus.Draft ? "alert-secondary" :
                                 Model.Status == TopicStatus.Approved ? "alert-success" :

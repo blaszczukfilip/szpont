@@ -4,16 +4,19 @@ namespace szpont.Models
 {
     public class ResetPassword
     {
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "{0} jest wymagane."), EmailAddress(ErrorMessage = "Nieprawidłowy adres e-mail.")]
+        [Display(Name = "E-mail")]
         public string Email { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Token jest wymagany.")]
         public string Token { get; set; }
-        [Required] 
+        [Required(ErrorMessage = "{0} jest wymagane.")]
         [DataType(DataType.Password)]
+        [Display(Name = "Hasło")]
         public string Password { get; set; }
-        [Required]
+        [Required(ErrorMessage = "{0} jest wymagane.")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Passwords must be identical.")]
+        [Compare("Password", ErrorMessage = "Hasła muszą być identyczne.")]
+        [Display(Name = "Powtórz hasło")]
         public string ConfirmPassword { get; set; }
     }
 }

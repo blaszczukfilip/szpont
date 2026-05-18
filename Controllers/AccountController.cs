@@ -34,7 +34,7 @@ namespace szpont.Controllers
             var indexExists = await _userManager.Users.AnyAsync(u => u.StudentIndex == vm.StudentIndex);
             if (indexExists)
             {
-                ModelState.AddModelError(nameof(vm.StudentIndex), "This index has been already used");
+                ModelState.AddModelError(nameof(vm.StudentIndex), "Ten numer indeksu jest już używany");
                 return View(vm);
             }
 
@@ -58,7 +58,40 @@ namespace szpont.Controllers
             }
 
             foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            {
+                var msg = error.Description;
+                switch (error.Code)
+                {
+                    case "DuplicateUserName":
+                    case "DuplicateEmail":
+                        msg = "Użytkownik o podanym adresie e-mail już istnieje.";
+                        break;
+                    case "InvalidToken":
+                        msg = "Nieprawidłowy lub wygasły token.";
+                        break;
+                    case "PasswordTooShort":
+                        msg = "Hasło jest za krótkie.";
+                        break;
+                    case "PasswordRequiresNonAlphanumeric":
+                        msg = "Hasło musi zawierać przynajmniej znak specjalny.";
+                        break;
+                    case "PasswordRequiresDigit":
+                        msg = "Hasło musi zawierać cyfrę.";
+                        break;
+                    case "PasswordRequiresUpper":
+                        msg = "Hasło musi zawierać wielką literę.";
+                        break;
+                    case "PasswordRequiresLower":
+                        msg = "Hasło musi zawierać małą literę.";
+                        break;
+                    default:
+                        if (string.IsNullOrWhiteSpace(msg))
+                            msg = "Wystąpił błąd podczas operacji.";
+                        break;
+                }
+
+                ModelState.AddModelError(string.Empty, msg);
+            }
 
             return View(vm);
         }
@@ -77,7 +110,7 @@ namespace szpont.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError("", "Invalid email or password");
+                ModelState.AddModelError("", "Nieprawidłowy e-mail lub hasło");
                 return View(model);
             }
 
@@ -108,7 +141,7 @@ namespace szpont.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError("", "Invalid email or password");
+            ModelState.AddModelError("", "Nieprawidłowy e-mail lub hasło");
             return View(model);
         }
 
@@ -197,7 +230,36 @@ namespace szpont.Controllers
                 return RedirectToAction("ResetPasswordConfirmation");
 
             foreach (var error in result.Errors)
-                ModelState.AddModelError("", error.Description);
+            {
+                var msg = error.Description;
+                switch (error.Code)
+                {
+                    case "InvalidToken":
+                        msg = "Nieprawidłowy lub wygasły token.";
+                        break;
+                    case "PasswordTooShort":
+                        msg = "Hasło jest za krótkie.";
+                        break;
+                    case "PasswordRequiresNonAlphanumeric":
+                        msg = "Hasło musi zawierać przynajmniej znak specjalny.";
+                        break;
+                    case "PasswordRequiresDigit":
+                        msg = "Hasło musi zawierać cyfrę.";
+                        break;
+                    case "PasswordRequiresUpper":
+                        msg = "Hasło musi zawierać wielką literę.";
+                        break;
+                    case "PasswordRequiresLower":
+                        msg = "Hasło musi zawierać małą literę.";
+                        break;
+                    default:
+                        if (string.IsNullOrWhiteSpace(msg))
+                            msg = "Wystąpił błąd podczas operacji.";
+                        break;
+                }
+
+                ModelState.AddModelError("", msg);
+            }
 
             return View(model);
         }

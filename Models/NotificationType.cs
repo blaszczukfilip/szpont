@@ -3,6 +3,8 @@ namespace szpont.Models
     public enum NotificationType
     {
         TopicReserved,
-        ReservationCancelled
+        ReservationCancelled,
+        ReservationAccepted,
+        ReservationRejected
     }
 }

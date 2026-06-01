@@ -107,7 +107,7 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Topics" asp-action="Index">Tematy</a>
                         </li>
-                        @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("promotor"))
+                        @if (User?.Identity?.IsAuthenticated == true && (User.IsInRole("promotor") || User.IsInRole("student")))
                         {
                             <li class="nav-item">
                                 <a class="nav-link notification-link" asp-controller="Notifications" asp-action="Index">
@@ -144,7 +144,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("promotor"))
+    @if (User?.Identity?.IsAuthenticated == true && (User.IsInRole("promotor") || User.IsInRole("student")))
     {
         <script>
             (function() {

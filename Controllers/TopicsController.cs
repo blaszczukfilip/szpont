@@ -77,6 +77,10 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+            if (ReservationStatusHelper.HasBeenAccepted(topic))
+            {
+                return RedirectWithModifyBlockedMessage(topic.Id);
+            }
             return View(topic);
         }
 
@@ -86,11 +90,17 @@ namespace szpont.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var topic = await _context.Topics.FindAsync(id);
-            if (topic != null)
+            if (topic == null)
             {
-                _context.Topics.Remove(topic);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+            if (ReservationStatusHelper.HasBeenAccepted(topic))
+            {
+                return RedirectWithModifyBlockedMessage(topic.Id);
+            }
+
+            _context.Topics.Remove(topic);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -189,6 +199,11 @@ namespace szpont.Controllers
             if (topic == null)
                 return NotFound();
 
+            if (ReservationStatusHelper.HasBeenAccepted(topic))
+            {
+                return RedirectWithModifyBlockedMessage(topic.Id);
+            }
+
             return View(topic);
         }
         [HttpPost]
@@ -200,6 +215,17 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+
+            var existingTopic = await _context.Topics.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+            if (existingTopic == null)
+            {
+                return NotFound();
+            }
+            if (ReservationStatusHelper.HasBeenAccepted(existingTopic))
+            {
+                return RedirectWithModifyBlockedMessage(existingTopic.Id);
+            }
+
             ModelState.Remove("Promotor");
             ModelState.Remove("Kierownik");
             ModelState.Remove("Dziekan");
@@ -245,7 +271,7 @@ namespace szpont.Controllers
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
             model.PromotorId = userId;
             model.Status = TopicStatus.Draft;
-            model.CreatedDate = DateTime.Now;
+            model.CreatedDate = DateTime.Now;   
             ModelState.Remove("PromotorId");
             ModelState.Remove("Status");
             ModelState.Remove("Promotor");
@@ -395,6 +421,12 @@ namespace szpont.Controllers
                 t.PromotorId == promotorId &&
                 t.Status == TopicStatus.Approved &&
                 t.StudentId == null);
+        }
+
+        private IActionResult RedirectWithModifyBlockedMessage(int topicId)
+        {
+            TempData["ErrorMessage"] = ReservationStatusHelper.CannotModifyWithAcceptedReservationMessage;
+            return RedirectToAction(nameof(Details), new { id = topicId });
         }
 
         private static string BuildTxtContent(Topic topic)

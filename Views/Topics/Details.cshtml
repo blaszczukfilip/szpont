@@ -234,7 +234,14 @@
         </div>
     }
 
-    @if (User.IsInRole("admin") || (User.IsInRole("promotor") && Model.PromotorId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+    var hasAcceptedReservation = ReservationStatusHelper.HasBeenAccepted(Model);
+    @if (hasAcceptedReservation && (User.IsInRole("admin") || (User.IsInRole("promotor") && Model.PromotorId == User.FindFirstValue(ClaimTypes.NameIdentifier))))
+    {
+        <div class="alert alert-secondary mt-3" role="status">
+            Temat ma zaakceptowaną rezerwację i przypisanego studenta.
+        </div>
+    }
+    @if (!hasAcceptedReservation && (User.IsInRole("admin") || (User.IsInRole("promotor") && Model.PromotorId == User.FindFirstValue(ClaimTypes.NameIdentifier))))
     {
         <div class="d-flex gap-2 action-buttons" style="margin-top:10px;">
             <form asp-action="Edit" method="get">

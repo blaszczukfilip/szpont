@@ -1,6 +1,6 @@
 @model szpont.Models.RegisterViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Rejestracja";
 }
 
 <style>
@@ -87,7 +87,7 @@
 
 <div class="register-container">
     <div class="card p-4">
-        <div class="card-header">Register</div>
+        <div class="card-header">Rejestracja</div>
         <div class="card-body">
             <form asp-controller="Account" asp-action="Register" method="post" novalidate>
                 @Html.AntiForgeryToken()
@@ -129,13 +129,13 @@
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Register</button>
+                <button type="submit" class="btn btn-primary">Zarejestruj się</button>
             </form>
 
             <div class="text-center mt-3">
                 <small>
-                    Already have an account?
-                    <a asp-controller="Account" asp-action="Login">Login</a>
+                    Masz już konto?
+                    <a asp-controller="Account" asp-action="Login">Zaloguj się</a>
                 </small>
             </div>
         </div>

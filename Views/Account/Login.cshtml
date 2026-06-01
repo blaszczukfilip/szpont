@@ -1,6 +1,6 @@
 @model szpont.Models.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Logowanie";
 }
 
 <style>
@@ -87,7 +87,7 @@
 
 <div class="register-container">
     <div class="card p-4">
-        <div class="card-header">Login</div>
+        <div class="card-header">Logowanie</div>
         <div class="card-body">
             <form asp-controller="Account" asp-action="Login" method="post">
                 @Html.AntiForgeryToken()
@@ -110,19 +110,19 @@
                     <label asp-for="RememberMe" class="form-check-label"></label>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary">Zaloguj się</button>
             </form>
 
             <div class="text-center mt-3">
                 <small>
-                    Don't have an account?
-                    <a asp-controller="Account" asp-action="Register">Register</a>
+                    Nie masz konta?
+                    <a asp-controller="Account" asp-action="Register">Zarejestruj się</a>
                 </small>
             </div>
             <div class="text-center mt-2">
                 <small>
-                    Forgot your password?
-                    <a asp-controller="Account" asp-action="ForgotPassword">Click here</a>
+                    Zapomniałeś hasła?
+                    <a asp-controller="Account" asp-action="ForgotPassword">Kliknij tutaj</a>
                 </small>
             </div>
         </div>

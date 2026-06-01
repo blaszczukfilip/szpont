@@ -33,5 +33,16 @@ namespace szpont.Models
                 return null;
             return status ?? ReservationStatus.Accepted;
         }
+
+        public static bool HasBeenAccepted(Topic topic)
+        {
+            if (topic == null || string.IsNullOrEmpty(topic.StudentId))
+                return false;
+
+            return EffectiveStatus(topic.StudentId, topic.ReservationStatus) == ReservationStatus.Accepted;
+        }
+
+        public const string CannotModifyWithAcceptedReservationMessage =
+            "Nie można edytować/usuwać tematu z zaakceptowaną rezerwacją.";
     }
 }

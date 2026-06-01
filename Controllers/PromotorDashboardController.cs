@@ -72,6 +72,10 @@ namespace szpont.Controllers
 
             topic.ReservationStatus = ReservationStatus.Accepted;
             await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(topic.StudentId))
+                await _notificationService.CreateReservationAcceptedNotificationAsync(topic, topic.StudentId);
+
             TempData["SuccessMessage"] = "Rezerwacja zosta�a zaakceptowana. Student jest przypisany do tematu.";
             return RedirectToAction("Details", "Topics", new { id = topic.Id });
         }
@@ -93,10 +97,15 @@ namespace szpont.Controllers
                 return RedirectToAction("Details", "Topics", new { id = topic.Id });
             }
 
+            var studentId = topic.StudentId;
             topic.StudentId = null;
             topic.ReservationDate = null;
             topic.ReservationStatus = null;
             await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(studentId))
+                await _notificationService.CreateReservationRejectedNotificationAsync(topic, studentId);
+
             TempData["SuccessMessage"] = "Rezerwacja zosta�a odrzucona. Temat jest ponownie dost�pny dla student�w.";
             return RedirectToAction("Details", "Topics", new { id = topic.Id });
         }

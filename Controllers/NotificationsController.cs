@@ -5,7 +5,7 @@ using szpont.Services;
 
 namespace szpont.Controllers
 {
-    [Authorize(Roles = "promotor")]
+    [Authorize(Roles = "promotor,student")]
     public class NotificationsController : Controller
     {
         private readonly INotificationService _notificationService;
@@ -22,6 +22,7 @@ namespace szpont.Controllers
                 return Unauthorized();
 
             var notifications = await _notificationService.GetUserNotificationsAsync(userId);
+            ViewBag.IsStudent = User.IsInRole("student");
             return View(notifications);
         }
 

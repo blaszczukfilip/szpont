@@ -90,5 +90,37 @@ namespace szpont.Services
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
         }
+
+        public async Task CreateReservationAcceptedNotificationAsync(Topic topic, string studentUserId)
+        {
+            var notification = new Notification
+            {
+                UserId = studentUserId,
+                Type = NotificationType.ReservationAccepted,
+                Message = $"Promotor zaakceptował Twoją rezerwację tematu \"{topic.Title}\".",
+                TopicId = topic.Id,
+                CreatedAt = DateTime.Now,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateReservationRejectedNotificationAsync(Topic topic, string studentUserId)
+        {
+            var notification = new Notification
+            {
+                UserId = studentUserId,
+                Type = NotificationType.ReservationRejected,
+                Message = $"Promotor odrzucił Twoją rezerwację tematu \"{topic.Title}\".",
+                TopicId = topic.Id,
+                CreatedAt = DateTime.Now,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+        }
     }
 }

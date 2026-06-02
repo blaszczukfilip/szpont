@@ -105,7 +105,7 @@
         {
             <div class="reservation-details">
                 <p><strong>Tytuł:</strong> @Model.Title</p>
-                <p><strong>Typ:</strong> @Model.Type</p>
+                <p><strong>Typ:</strong> @Model.Type.GetDisplayName()</p>
                 <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
                 @if (Model.Promotor != null)
                 {

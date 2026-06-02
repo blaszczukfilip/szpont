@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Text;
 using szpont.Data;
+using szpont.Helpers;
 using szpont.Models;
 using szpont.Services;
 
@@ -25,7 +27,7 @@ namespace szpont.Controllers
             _notificationService = notificationService;
         }
 
-        public IActionResult Index(string searchTerm, string typeFilter, string keywordFilter)
+        public IActionResult Index(string searchTerm, TopicType? typeFilter, string keywordFilter)
         {
             var baseTopics = _context.Topics.AsQueryable();
             //jesli user to student pokazuj tylko tematy approved
@@ -34,11 +36,7 @@ namespace szpont.Controllers
              baseTopics = baseTopics.Where(t => t.Status == TopicStatus.Approved && t.StudentId == null);
             }
 
-            var types = baseTopics
-                .Select(t => t.Type)
-                .Distinct()
-                .OrderBy(t => t)
-                .ToList();
+            var types = Enum.GetValues<TopicType>().OrderBy(t => t).ToList();
 
             var topics = baseTopics;
 
@@ -46,9 +44,16 @@ namespace szpont.Controllers
             {
                 topics = topics.Where(t => t.Title.Contains(searchTerm) || t.Description.Contains(searchTerm));
             }
-            if (!string.IsNullOrWhiteSpace(typeFilter))
+            if (typeFilter.HasValue)
             {
-                topics = topics.Where(t => t.Type == typeFilter);
+                if (!Enum.IsDefined(typeof(TopicType), typeFilter.Value))
+                {
+                    typeFilter = null;
+                }
+                else
+                {
+                    topics = topics.Where(t => t.Type == typeFilter.Value);
+                }
             }
             if (!string.IsNullOrWhiteSpace(keywordFilter))
             {
@@ -251,6 +256,8 @@ namespace szpont.Controllers
             ModelState.Remove("Dziekan");
             ModelState.Remove("Student");
 
+            ValidateTopicType(ModelState, topic.Type);
+
             if (ModelState.IsValid)
             {
                 try
@@ -295,6 +302,8 @@ namespace szpont.Controllers
             ModelState.Remove("PromotorId");
             ModelState.Remove("Status");
             ModelState.Remove("Promotor");
+
+            ValidateTopicType(ModelState, model.Type);
 
             if (ModelState.IsValid)
             {
@@ -458,6 +467,14 @@ namespace szpont.Controllers
             return RedirectToAction(nameof(Details), new { id = topicId });
         }
 
+        private static void ValidateTopicType(ModelStateDictionary modelState, TopicType type)
+        {
+            if (!Enum.IsDefined(typeof(TopicType), type))
+            {
+                modelState.AddModelError(nameof(Topic.Type), "Nieprawidłowy typ pracy dyplomowej.");
+            }
+        }
+
         private static string BuildTxtContent(Topic topic)
         {
             var promotorFullName = GetPromotorFullName(topic);
@@ -466,6 +483,7 @@ namespace szpont.Controllers
 
             var builder = new StringBuilder();
             builder.AppendLine($"Temat: {topic.Title}");
+            builder.AppendLine($"Typ: {topic.Type.GetDisplayName()}");
             builder.AppendLine($"Opis: {description}");
             builder.AppendLine($"Promotor: {promotorFullName}");
             builder.AppendLine($"Słowa kluczowe: {keywords}");
@@ -481,9 +499,10 @@ namespace szpont.Controllers
             var keywords = string.IsNullOrWhiteSpace(topic.Keywords) ? "Brak" : topic.Keywords;
 
             var builder = new StringBuilder();
-            builder.AppendLine("Temat,Opis,Promotor,Słowa kluczowe,Status");
+            builder.AppendLine("Temat,Typ,Opis,Promotor,Słowa kluczowe,Status");
             builder.AppendLine(string.Join(",",
                 EscapeCsv(topic.Title),
+                EscapeCsv(topic.Type.GetDisplayName()),
                 EscapeCsv(description),
                 EscapeCsv(promotorFullName),
                 EscapeCsv(keywords),
@@ -517,6 +536,7 @@ namespace szpont.Controllers
                     {
                         column.Spacing(8);
                         column.Item().Text($"Temat: {topic.Title}");
+                        column.Item().Text($"Typ: {topic.Type.GetDisplayName()}");
                         column.Item().Text($"Opis: {description}");
                         column.Item().Text($"Promotor: {promotorFullName}");
                         column.Item().Text($"Słowa kluczowe: {keywords}");

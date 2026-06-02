@@ -15,7 +15,7 @@
 
     <div class="form-group">
         <label asp-for="Type"></label>
-        <input asp-for="Type" class="form-control" />
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList<TopicType>()" class="form-control"></select>
         <span asp-validation-for="Type" class="text-danger"></span>
     </div>
 

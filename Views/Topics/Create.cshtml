@@ -26,12 +26,8 @@
 
         <div class="form-field">
             <label asp-for="Type">Typ *</label>
-            <select asp-for="Type">
+            <select asp-for="Type" asp-items="Html.GetEnumSelectList<TopicType>()">
                 <option value="">-- wybierz --</option>
-                <option>Licencjacka</option>
-                <option>Inżynierska</option>
-                <option>Magisterska</option>
-                <option>Doktorska</option>
             </select>
             <span asp-validation-for="Type" class="text-danger"></span>
         </div>

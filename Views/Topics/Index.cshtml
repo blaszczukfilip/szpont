@@ -29,15 +29,15 @@
                 <option value="">Wszystkie typy</option>
                 @if (ViewBag.Types != null)
                 {
-                    @foreach (var type in ViewBag.Types)
+                    @foreach (TopicType type in ViewBag.Types)
                     {
-                        if (ViewBag.TypeFilter == type)
+                        if (ViewBag.TypeFilter as TopicType? == type)
                         {
-                            <option value="@type" selected>@type</option>
+                            <option value="@((int)type)" selected>@type.GetDisplayName()</option>
                         }
                         else
                         {
-                            <option value="@type">@type</option>
+                            <option value="@((int)type)">@type.GetDisplayName()</option>
                         }
                     }
                 }
@@ -80,7 +80,7 @@
             {
                 <tr onclick="window.location='@Url.Action("Details", "Topics", new { id = topic.Id })'" style="cursor: pointer;">
                     <td><strong>@topic.Title</strong></td>
-                    <td>@topic.Type</td>
+                    <td>@topic.Type.GetDisplayName()</td>
                     <td>
                         @if (!string.IsNullOrEmpty(topic.Description))
                         {

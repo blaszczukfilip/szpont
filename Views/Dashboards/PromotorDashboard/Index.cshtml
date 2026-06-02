@@ -125,7 +125,7 @@
             {
                 <tr>
                     <td>@item.Title</td>
-                    <td>@item.Type</td>
+                    <td>@item.Type.GetDisplayName()</td>
                     <td>@item.CreatedDate.ToString("dd.MM.yyyy")</td>
                     <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm dashboard-btn">Szczegóły</a></td>
                 </tr>
@@ -150,7 +150,7 @@
             {
                 <tr>
                     <td>@item.Title</td>
-                    <td>@item.Type</td>
+                    <td>@item.Type.GetDisplayName()</td>
                     <td>@item.Status</td>
                     <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm dashboard-btn">Szczegóły</a></td>
                 </tr>
@@ -175,7 +175,7 @@
             {
                 <tr>
                     <td>@item.Title</td>
-                    <td>@item.Type</td>
+                    <td>@item.Type.GetDisplayName()</td>
                     <td>@item.CreatedDate.ToString("dd.MM.yyyy")</td>
                     <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm dashboard-btn">Szczegóły</a></td>
                 </tr>
@@ -200,7 +200,7 @@
             {
                 <tr>
                     <td>@item.Title</td>
-                    <td>@item.Type</td>
+                    <td>@item.Type.GetDisplayName()</td>
                     <td class="dashboard-text-danger">@item.RejectionReason</td>
                     <td><a asp-controller="Topics" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm dashboard-btn">Szczegóły</a></td>
                 </tr>

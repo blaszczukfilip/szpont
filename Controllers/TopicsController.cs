@@ -77,6 +77,10 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+            if (!CanModifyTopic(topic))
+            {
+                return Forbid();
+            }
             if (ReservationStatusHelper.HasBeenAccepted(topic))
             {
                 return RedirectWithModifyBlockedMessage(topic.Id);
@@ -93,6 +97,10 @@ namespace szpont.Controllers
             if (topic == null)
             {
                 return NotFound();
+            }
+            if (!CanModifyTopic(topic))
+            {
+                return Forbid();
             }
             if (ReservationStatusHelper.HasBeenAccepted(topic))
             {
@@ -199,6 +207,11 @@ namespace szpont.Controllers
             if (topic == null)
                 return NotFound();
 
+            if (!CanModifyTopic(topic))
+            {
+                return Forbid();
+            }
+
             if (ReservationStatusHelper.HasBeenAccepted(topic))
             {
                 return RedirectWithModifyBlockedMessage(topic.Id);
@@ -209,7 +222,7 @@ namespace szpont.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "promotor, admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords,CreatedDate,Status,PromotorId,KierownikId,DziekanId,StudentId,ReservationDate,ReservationStatus,RejectionReason,SubmittedDate,ApprovedDate")] Topic topic)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Type,Description,Keywords,CreatedDate,Status,KierownikId,DziekanId,StudentId,ReservationDate,ReservationStatus,RejectionReason,SubmittedDate,ApprovedDate")] Topic topic)
         {
             if (id != topic.Id)
             {
@@ -221,12 +234,19 @@ namespace szpont.Controllers
             {
                 return NotFound();
             }
+            if (!CanModifyTopic(existingTopic))
+            {
+                return Forbid();
+            }
             if (ReservationStatusHelper.HasBeenAccepted(existingTopic))
             {
                 return RedirectWithModifyBlockedMessage(existingTopic.Id);
             }
 
+            topic.PromotorId = existingTopic.PromotorId;
+
             ModelState.Remove("Promotor");
+            ModelState.Remove("PromotorId");
             ModelState.Remove("Kierownik");
             ModelState.Remove("Dziekan");
             ModelState.Remove("Student");
@@ -421,6 +441,15 @@ namespace szpont.Controllers
                 t.PromotorId == promotorId &&
                 t.Status == TopicStatus.Approved &&
                 t.StudentId == null);
+        }
+
+        private bool CanModifyTopic(Topic topic)
+        {
+            if (User.IsInRole("admin"))
+                return true;
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return topic.PromotorId == currentUserId;
         }
 
         private IActionResult RedirectWithModifyBlockedMessage(int topicId)

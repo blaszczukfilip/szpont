@@ -45,7 +45,7 @@
                 {
                     <tr>
                         <td>@item.Title</td>
-                        <td>@item.Type</td>
+                        <td>@item.Type.GetDisplayName()</td>
                         <td>
                             @if (item.Promotor != null)
                             {

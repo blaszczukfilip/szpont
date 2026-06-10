@@ -31,7 +31,7 @@
     <div class="row">
         <div class="col-md-8">
             <p><strong>Tytuł:</strong> @Model.Title</p>
-            <p><strong>Typ:</strong> @Model.Type</p>
+            <p><strong>Typ:</strong> @Model.Type.GetDisplayName()</p>
             <p><strong>Opis:</strong> @(string.IsNullOrEmpty(Model.Description) ? "Brak opisu" : Model.Description)</p>
             <p><strong>Słowa kluczowe:</strong> @(string.IsNullOrEmpty(Model.Keywords) ? "Brak" : Model.Keywords)</p>
             <p><strong>Data utworzenia:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>

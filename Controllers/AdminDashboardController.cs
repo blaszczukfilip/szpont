@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using szpont.Data;
+using szpont.Helpers;
 using szpont.Models;
 using System.Text;
 
@@ -57,7 +58,7 @@ namespace szpont.Controllers
             // Grupowanie tematów według typu
             viewModel.TopicsByType = allTopics
                 .GroupBy(t => t.Type)
-                .ToDictionary(g => g.Key, g => g.Count());
+                .ToDictionary(g => g.Key.GetDisplayName(), g => g.Count());
 
             // Główne statystyki dla kart - tylko 2 karty
             viewModel.MainStats = new Dictionary<string, (int Value, string CssClass)>

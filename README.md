@@ -102,6 +102,58 @@ Przy pierwszym uruchomieniu aplikacji (lub gdy tabela `Topics` jest pusta) syste
   - `await TopicSeeder.SeedAsync(services);`
 - Seed zawiera **min. 15 zróżnicowanych tematów** (różne typy – inżynierskie/magisterskie, różne dziedziny, bogate słowa kluczowe), co pozwala od razu testować widoki listy, szczegółów, edycji i usuwania tematów.
 
+## Umiejętności ról
+
+W systemie SZPONT zastosowano kilka ról użytkowników. Każda rola ma przypisany osobny zakres uprawnień, dzięki czemu użytkownicy widzą tylko te funkcje, które są im potrzebne do pracy w systemie.
+
+### Administrator
+
+Administrator posiada najszersze uprawnienia w systemie. Ma dostęp do panelu administracyjnego, w którym może przeglądać statystyki dotyczące użytkowników, ról oraz tematów prac dyplomowych. Administrator może również wygenerować raport systemowy w formacie TXT lub CSV.
+
+Administrator zarządza użytkownikami systemu. Może przeglądać listę kont, wyszukiwać użytkowników po imieniu, nazwisku, adresie e-mail lub numerze indeksu, filtrować użytkowników według roli oraz korzystać z paginacji listy. Ma także możliwość edycji danych użytkownika, zmiany jego roli, blokowania i odblokowywania kont.
+
+Administrator może również zarządzać tematami prac dyplomowych. Ma możliwość tworzenia, edycji oraz usuwania tematów. W przeciwieństwie do promotora nie jest ograniczony tylko do tematów przypisanych do siebie.
+
+### Student
+
+Student może przeglądać listę dostępnych tematów prac dyplomowych. W widoku tematów student widzi tylko tematy zatwierdzone, które nie zostały jeszcze przypisane do żadnego innego studenta.
+
+Student może zarezerwować wybrany temat. System sprawdza przy tym, czy student nie ma już aktywnej rezerwacji lub przypisanego tematu. Po rezerwacji temat otrzymuje status rezerwacji oczekującej na decyzję promotora.
+
+Student może anulować swoją rezerwację, ale tylko wtedy, gdy jest ona jeszcze w stanie oczekiwania na akceptację promotora. Po zaakceptowaniu rezerwacji przez promotora anulowanie z poziomu systemu nie jest już dostępne.
+
+Student ma również dostęp do swojego panelu, w którym widzi informacje o własnej rezerwacji, liczbę dostępnych tematów oraz powiadomienia dotyczące zmian w systemie.
+
+### Promotor
+
+Promotor może tworzyć nowe tematy prac dyplomowych. Nowo utworzony temat trafia najpierw do statusu szkicu, dzięki czemu promotor może go przygotować przed wysłaniem do akceptacji.
+
+Promotor może edytować i usuwać tylko te tematy, których jest właścicielem. System blokuje możliwość modyfikacji tematu, jeżeli rezerwacja została już zaakceptowana.
+
+Promotor może wysłać temat do akceptacji przez kierownika. Po wysłaniu temat zmienia status ze szkicu na oczekujący na decyzję kierownika. System kontroluje również limit tematów dostępnych do rezerwacji dla jednego promotora.
+
+Promotor obsługuje rezerwacje tematów zgłaszane przez studentów. Może zaakceptować albo odrzucić rezerwację. Po zaakceptowaniu student zostaje przypisany do tematu, a po odrzuceniu temat wraca do puli dostępnych tematów.
+
+W panelu promotora wyświetlane są statystyki jego tematów, między innymi liczba szkiców, tematów oczekujących na akceptację, tematów zatwierdzonych, odrzuconych oraz liczba oczekujących rezerwacji.
+
+### Kierownik
+
+Kierownik bierze udział w procesie akceptacji tematów prac dyplomowych. W swoim panelu widzi tematy, które mają status oczekujący na decyzję kierownika.
+
+Kierownik może sortować listę tematów według daty zgłoszenia. Dzięki temu może sprawdzać tematy od najstarszych lub od najnowszych.
+
+Kierownik może zaakceptować temat. Po akceptacji temat nie trafia jeszcze bezpośrednio do listy dostępnej dla studentów, tylko zostaje przekazany dalej do dziekana.
+
+Kierownik może również odrzucić temat. W takim przypadku musi podać powód odrzucenia, który zostaje zapisany w systemie.
+
+### Dziekan
+
+Dziekan odpowiada za końcowy etap akceptacji tematów prac dyplomowych. W swoim panelu widzi tematy, które zostały już zaakceptowane przez kierownika i oczekują na decyzję dziekana.
+
+Dziekan może zaakceptować temat. Po tej decyzji temat otrzymuje status zatwierdzony i staje się dostępny do rezerwacji przez studentów, o ile nie został przekroczony limit tematów dostępnych u danego promotora.
+
+Dziekan może również odrzucić temat. Podczas odrzucania wymagane jest podanie powodu, który zostaje zapisany przy temacie.
+
 ---
 
 
